@@ -1,6 +1,4 @@
 using ImageQualityIndexes
-using Test
-
-@testset "ImageQualityIndexes.jl" begin
-    # Write your own tests here.
-end
+using Test, ReferenceTests
+include("testutils.jl")
+include("psnr.jl")

@@ -3,11 +3,18 @@ uuid = "2996bd0c-7a13-11e9-2da2-2f5ce47296a9"
 authors = ["Johnny Chen <johnnychen94@hotmail.com>"]
 version = "0.1.0"
 
+[deps]
+ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
+ImageDistances = "51556ac3-7006-55f5-8cb3-34580c88182d"
+
 [compat]
+ImageCore = ">= 0.8.3"
 julia = "1"
 
 [extras]
+IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["IterTools", "ReferenceTests", "Test"]
