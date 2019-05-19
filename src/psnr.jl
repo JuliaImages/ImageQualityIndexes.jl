@@ -1,6 +1,7 @@
 """
     PeakSignalNoiseRatio <: FullReferenceIQI
-    psnr(x, ref [, peakval]) -> Union{AbstractFloat, Vector{<:AbstractFloat}}
+    psnr(x, ref [, peakval])
+    assess(PSNR(), x, ref, [, peakval])
 
 Peak signal-to-noise ratio (PSNR) is used to measure the quality of image.
 
@@ -9,17 +10,16 @@ is the maximum possible pixel value of image `ref`, and
 [`mse`](@ref ImageDistances.mse) is the mean squared error between images `x`
 and `ref`.
 
-For general `Color3` images, PSNR is reported against each channel of that
-color space as a `Vector` result. One exception is `AbstractRGB` images, where
-`mse` is calculated over three channels.
+!!! info
 
-!!! warning
+    For general `Color3` images, PSNR is reported against each channel of that
+    color space as a `Vector`. One exception is `AbstractRGB` images, where
+    `mse` is calculated over three channels by convention.
 
-    `peakval` is optional only for gray and RGB color space. For other color spaces, you need to explicitly pass it.
+!!! info
 
-# References
-
-[1] Wikipedia contributors. (2019, March 14). Peak signal-to-noise ratio. In _Wikipedia, The Free Encyclopedia_. Retrieved 07:18, May 16, 2019, from https://en.wikipedia.org/w/index.php?title=Peak_signal-to-noise_ratio&oldid=887764757
+    `peakval` is optional only for gray and RGB color space. For other color
+    spaces, you need to explicitly pass it as a `Vector`.
 """
 struct PeakSignalNoiseRatio <: FullReferenceIQI end
 const PSNR = PeakSignalNoiseRatio # alias PSNR since it's too famous
@@ -42,18 +42,14 @@ function peak_value(::Type{T}) where T <: Color3
     throw(ArgumentError(err_msg))
 end
 
-psnr(x::GenericGrayImage,
-     ref::GenericGrayImage,
-     peakval::Real) =
+psnr(x::GenericGrayImage, ref::GenericGrayImage, peakval::Real) =
     20log10(peakval) - 10log10(mse(x, ref))
 
-psnr(x::GenericImage{<:AbstractRGB},
-     ref::GenericImage{<:AbstractRGB},
+psnr(x::GenericImage{<:AbstractRGB}, ref::GenericImage{<:AbstractRGB},
      peakval::Real) =
     psnr(channelview(x), channelview(ref), peakval)
 
-function psnr(x::GenericImage{<:Color3},
-              ref::GenericImage{CT},
+function psnr(x::GenericImage{<:Color3}, ref::GenericImage{CT},
               peakvals) where {CT<:Color3}
     check_peakvals(CT, peakvals)
 
