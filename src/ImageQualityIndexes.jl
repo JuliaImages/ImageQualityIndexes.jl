@@ -1,5 +1,9 @@
 module ImageQualityIndexes
 
-greet() = print("Hello World!")
+    include("generic.jl")
+
+    export
+        # generic
+        assess
 
 end # module
