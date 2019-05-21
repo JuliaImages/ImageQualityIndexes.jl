@@ -55,7 +55,7 @@ function _psnr(x::GenericImage{<:Color3}, ref::GenericImage{CT},
               peakvals)::Vector where {CT<:Color3}
     check_peakvals(CT, peakvals)
 
-    newx = of_eltype(eltype(ref), x)
+    newx = of_eltype(CT, x)
     cx, ax = channelview(newx), axes(newx)
     cref, aref = channelview(ref), axes(ref)
     [_psnr(view(cx, i, ax...),
