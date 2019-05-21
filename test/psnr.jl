@@ -17,9 +17,15 @@
             a = A .|> T
             b = B .|> T
 
+            # scalar output
             @test psnr(a, b) == assess(PSNR(), a, b)
             @test psnr(a, b) == psnr(a, b, 1.0)
-            @test isinf(psnr(A, A))
+            @test isinf(psnr(a, a))
+
+            # vector output
+            @test size(psnr(a, b, [1.0])) == (1,)
+            @test mean(psnr(a, b, [1.0])) == psnr(a, b, 1.0)
+            @test all(isinf.(psnr(a, a, [1.0])))
 
             # FIXME: the result of Bool type is not strictly equal to others
             eltype(T) <: Bool && continue
@@ -44,14 +50,23 @@
             a = A .|> T
             b = B .|> T
 
-            @test psnr(a, b) == assess(PSNR(), a, b)
-            @test psnr(a, b) == psnr(a, b, 1.0)
-            @test isinf(psnr(A, A))
+            # scalar output
+            @test psnr(a, b) == assess(PSNR(), a, b) == PSNR()(a, b)
+            @test psnr(a, b) == psnr(a, b, 1.0) == PSNR()(a, b, 1.0)
+            @test isinf(psnr(a, a))
+
+            # vector output
+            @test_throws ArgumentError psnr(a, b, [1.0])
+            @test psnr(a, b, [1.0, 1.0, 1.0]) == assess(PSNR(), a, b, [1.0, 1.0, 1.0]) == PSNR()(a, b, [1.0, 1.0, 1.0])
+            @test size(psnr(a, b, [1.0, 1.0, 1.0])) == (3,)
+            @test mean(psnr(a, b, [1.0, 1.0, 1.0])) != psnr(a, b) # generally they doesn't equal
+            @test all(isinf.(psnr(a, a, [1.0, 1.0, 1.0])))
 
             test_numeric(iqi, a, b, T)
             test_numeric(iqi, channelview(a), channelview(b), T; filename="references/PeakSignalNoiseRatio_2d_RGB")
         end
     end
+    type_list = generate_test_types([Float32, N0f8], [RGB, BGR])
     test_cross_type(iqi, A, B, type_list)
 
     # general Color3 images that doesn't have peakval inferred
@@ -67,9 +82,16 @@
             a = A .|> T
             b = B .|> T
 
+            # peakval of RGB is inferable
+            @test_nowarn psnr(a, B)
+            @test_throws ArgumentError psnr(A, b)
+
+            # generally, peakval is not inferable
             @test_throws ArgumentError psnr(a, b)
             @test_throws ArgumentError psnr(a, b, 1.0)
-            @test psnr(a, b, [1.0, 1.0, 1.0]) == assess(PSNR(), a, b, [1.0, 1.0, 1.0])
+            @test_throws ArgumentError psnr(a, b, [1.0])
+
+            @test psnr(a, b, [1.0, 1.0, 1.0]) == assess(PSNR(), a, b, [1.0, 1.0, 1.0]) == PSNR()(a, b, [1.0, 1.0, 1.0])
             @test all(isinf.(psnr(A, A, [1.0, 1.0, 1.0])))
         end
     end
