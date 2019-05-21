@@ -1,5 +1,5 @@
 """
-    PeakSignalNoiseRatio <: FullReferenceIQI
+    PSNR <: FullReferenceIQI
     psnr(x, ref [, peakval])
     assess(PSNR(), x, ref, [, peakval])
 
@@ -19,14 +19,13 @@ Generally, for non-gray image `x`, PSNR is reported against each channel of
     calculated channelwise PSNR of rgb image, one could pass `peakval` as
     vector, e.g., `psnr(x, ref, [1.0, 1.0, 1.0])`
 """
-struct PeakSignalNoiseRatio <: FullReferenceIQI end
-const PSNR = PeakSignalNoiseRatio # alias PSNR since it's too famous
+struct PSNR <: FullReferenceIQI end
 
 # api
 (iqi::PSNR)(x, ref, peakval) = _psnr(x, ref, peakval)
 (iqi::PSNR)(x, ref) = iqi(x, ref, peak_value(eltype(ref)))
 
-@doc (@doc PeakSignalNoiseRatio)
+@doc (@doc PSNR)
 psnr(x, ref, peakval) = _psnr(x, ref, peakval)
 psnr(x, ref) = psnr(x, ref, peak_value(eltype(ref)))
 

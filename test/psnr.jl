@@ -4,8 +4,6 @@
     iqi = PSNR()
     sz_img_3 = (3, 3, 3)
 
-    @test PSNR === PeakSignalNoiseRatio
-
     # Gray image
     type_list = generate_test_types([Bool, Float32, N0f8], [Gray])
     A = [1.0 1.0 1.0; 1.0 1.0 1.0; 0.0 0.0 0.0]
@@ -53,6 +51,7 @@
             # scalar output
             @test psnr(a, b) == assess(PSNR(), a, b) == PSNR()(a, b)
             @test psnr(a, b) == psnr(a, b, 1.0) == PSNR()(a, b, 1.0)
+            @test psnr(a, b) == psnr(channelview(a), channelview(b))
             @test isinf(psnr(a, a))
 
             # vector output
@@ -63,7 +62,7 @@
             @test all(isinf.(psnr(a, a, [1.0, 1.0, 1.0])))
 
             test_numeric(iqi, a, b, T)
-            test_numeric(iqi, channelview(a), channelview(b), T; filename="references/PeakSignalNoiseRatio_2d_RGB")
+            test_numeric(iqi, channelview(a), channelview(b), T; filename="references/PSNR_2d_RGB")
         end
     end
     type_list = generate_test_types([Float32, N0f8], [RGB, BGR])

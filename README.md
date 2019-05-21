@@ -4,7 +4,7 @@ ImageQualityIndexes provides the basic image quality assessment methods.
 
 ## Supported indexes
 
-* `PeakSignalNoiseRatio` (aka `PSNR`)
+* `PSNR` -- Peak signal-to-noise ratio
 
 
 ## Basic usage

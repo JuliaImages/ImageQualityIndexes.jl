@@ -13,7 +13,6 @@ export
     assess,
 
     # Peak signal-to-noise ratio
-    PeakSignalNoiseRatio,
     PSNR,
     psnr
 
