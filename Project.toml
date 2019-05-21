@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 ImageDistances = "51556ac3-7006-55f5-8cb3-34580c88182d"
+MappedArrays = "dbb5928d-eab1-5f90-85c2-b9b0edb7c900"
 
 [compat]
 ImageCore = ">= 0.8.3"

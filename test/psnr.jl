@@ -68,6 +68,7 @@
     end
     type_list = generate_test_types([Float32, N0f8], [RGB, BGR])
     test_cross_type(iqi, A, B, type_list)
+    @test isapprox(psnr(Lab.(A), B), psnr(A, B); rtol=1e-5)
 
     # general Color3 images that doesn't have peakval inferred
     type_list = generate_test_types([Float32], [Lab, HSV])

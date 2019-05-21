@@ -1,5 +1,6 @@
 module ImageQualityIndexes
 
+using MappedArrays
 using ImageCore
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
 using ImageDistances

@@ -47,13 +47,7 @@ _psnr(x::GenericGrayImage, ref::GenericGrayImage, peakval::Real)::Real =
 # m*n RGB images are treated as m*n*3 gray images
 function _psnr(x::GenericImage{<:Color3}, ref::GenericImage{<:AbstractRGB},
                peakval::Real)::Real
-    if !(eltype(x) <: AbstractRGB)
-       newx = convert.(eltype(ref), x)
-    else
-       newx = x
-    end
-
-    _psnr(channelview(newx), channelview(ref), peakval)
+    _psnr(channelview(of_eltype(eltype(ref), x)), channelview(ref), peakval)
 end
 
 # general channelwise definition: each channel is calculated independently
@@ -61,12 +55,7 @@ function _psnr(x::GenericImage{<:Color3}, ref::GenericImage{CT},
               peakvals)::Vector where {CT<:Color3}
     check_peakvals(CT, peakvals)
 
-    if !(eltype(x) === eltype(ref))
-        newx = convert.(eltype(ref), x)
-    else
-        newx = x
-    end
-
+    newx = of_eltype(eltype(ref), x)
     cx, ax = channelview(newx), axes(newx)
     cref, aref = channelview(ref), axes(ref)
     [_psnr(view(cx, i, ax...),
@@ -80,11 +69,10 @@ function _psnr(x::GenericGrayImage, ref::GenericGrayImage,
     [_psnr(x, ref, peakval[1]), ]
 end
 
+_length(x) = length(x)
+_length(x::Type{T}) where T<:Number = 1
 function check_peakvals(CT, peakvals)
-    n = length(peakvals)
-    if n==1 && CT <: NumberLike
-        return nothing
-    elseif n ≠ length(CT)
+    if _length(peakvals) ≠ _length(CT)
         err_msg = "peakvals for PSNR should be length-$(length(CT)) vector for $(base_colorant_type(CT)) images"
         throw(ArgumentError(err_msg))
     end
