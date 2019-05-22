@@ -3,14 +3,21 @@ uuid = "2996bd0c-7a13-11e9-2da2-2f5ce47296a9"
 authors = ["Johnny Chen <johnnychen94@hotmail.com>"]
 version = "0.1.0"
 
+[deps]
+ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
+ImageDistances = "51556ac3-7006-55f5-8cb3-34580c88182d"
+MappedArrays = "dbb5928d-eab1-5f90-85c2-b9b0edb7c900"
+
 [compat]
+ImageCore = ">= 0.8.3"
+ImageDistances = ">= 0.2.4"
 julia = "1"
 
 [extras]
-ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["ImageCore", "IterTools", "ReferenceTests", "Test"]
+test = ["Statistics", "IterTools", "ReferenceTests", "Test"]
