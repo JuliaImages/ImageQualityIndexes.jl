@@ -6,13 +6,12 @@
 Structural similarity (SSIM) index is an image quality assessment method based
 on degradation of structural information.
 
-The SSIM index is composed of three components: luminance similarity, contrast
-similarity, and structural similarity. `ssim = 𝐿ᵅ * 𝐶ᵝ * 𝑆ᵞ`,
-where `W := (α, β, γ)` controls relative importance of each components.
-By default `W = (1.0, 1.0, 1.0)`.
+The SSIM index is composed of three components: luminance, contrast, and
+structure. `ssim = 𝐿ᵅ * 𝐶ᵝ * 𝑆ᵞ`, where `W := (α, β, γ)` controls relative
+importance of each components. By default `W = (1.0, 1.0, 1.0)`.
 
-In practice, a local version SSIM is used. At each pixel, SSIM is calculated
-locally with neighborhoods weighted by guassian `kernel`, returning a ssim map;
+In practice, a mean version SSIM is used. At each pixel, SSIM is calculated
+locally with neighborhoods weighted by `kernel`, returning a ssim map;
 `ssim` is actaully `mean(ssim_map)`.
 By default `kernel = KernelFactors.gaussian(1.5, 11)`.
 
@@ -23,8 +22,9 @@ By default `kernel = KernelFactors.gaussian(1.5, 11)`.
 
 # Example
 
-In most cases, `ssim(img, ref)` should be sufficient, which calls the default
-SSIM. One could also instantiate a SSIM and pass it to `assess`, for example:
+In most cases, one doesn't need to provide any additional parameters;
+`ssim(img, ref)` should be sufficient. One could also instantiate a SSIM and
+pass it to `assess`, for example:
 
 ```julia
 iqi = SSIM(KernelFactors.gaussian(2.5, 17), (1.0, 1.0, 2.0))
@@ -75,7 +75,7 @@ function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakva
         throw(err)
     end
     α, β, γ = iqi.W
-    C₁, C₂ = (peakval .* (K[1], K[2])).^2.0
+    C₁, C₂ = @. (peakval * K)^2
     C₃ = C₂/2
 
     T = promote_type(floattype(eltype(ref)), floattype(eltype(x)))
