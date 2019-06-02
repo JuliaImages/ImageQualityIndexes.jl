@@ -7,7 +7,7 @@ Structural similarity (SSIM) index is an image quality assessment method based
 on degradation of structural information.
 
 The SSIM index is composed of three components: luminance, contrast, and
-structure. `ssim = 𝐿ᵅ * 𝐶ᵝ * 𝑆ᵞ`, where `W := (α, β, γ)` controls relative
+structure; `ssim = 𝐿ᵅ * 𝐶ᵝ * 𝑆ᵞ`, where `W := (α, β, γ)` controls relative
 importance of each components. By default `W = (1.0, 1.0, 1.0)`.
 
 In practice, a mean version SSIM is used. At each pixel, SSIM is calculated
@@ -17,18 +17,21 @@ By default `kernel = KernelFactors.gaussian(1.5, 11)`.
 
 !!! info
 
-    RGB images are treated as 3d Gray images, general Color3 images are
-    converted to RGB images first.
+    SSIM is defined only for gray images. RGB images are treated as 3d Gray
+    images. General `Color3` images are converted to RGB images first, in which
+    case, you could manually expand them using `channelview` if you don't want
+    them converted to RGB first.
 
 # Example
 
-In most cases, one doesn't need to provide any additional parameters;
-`ssim(img, ref)` should be sufficient. One could also instantiate a SSIM and
-pass it to `assess`, for example:
+`ssim(img, ref)` should be sufficient to get a benchmark for algorithms. One
+could also instantiate a customed SSIM, then pass it to `assess` or use it as a
+function. For example:
 
 ```julia
 iqi = SSIM(KernelFactors.gaussian(2.5, 17), (1.0, 1.0, 2.0))
 assess(iqi, img, ref)
+iqi(img, ref)
 ```
 
 # Reference
@@ -53,10 +56,15 @@ const SSIM_W = (1.0, 1.0, 1.0) # (α, β, γ)
 SSIM(kernel=SSIM_KERNEL) = SSIM(kernel, SSIM_W)
 
 # api
+# By default we don't crop the padding boundary to meet the ssim result from
+# MATLAB Image Processing Toolbox, which is used much broadly than the original
+# implementaion [2] (written in MATLAB as well).
+# TODO: add keyword argument "crop=false" for compatibility
+# -- Johnny Chen <johnnychen94@hotmail.com>
 (iqi::SSIM)(x, ref) = mean(_ssim_map(iqi, x, ref))
 
 @doc (@doc SSIM)
-ssim(x, ref) = mean(_ssim_map(SSIM(), x, ref))
+ssim(x, ref) = SSIM()(x, ref)
 
 # Parameters `(K₁, K₂)` are used to avoid instability when denominator is very
 # close to zero. Different from origianl implementation [2], we don't make it

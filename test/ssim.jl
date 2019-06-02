@@ -95,4 +95,5 @@ using ImageFiltering
             @test ssim(a, b) ≠ ssim(channelview(a), channelview(b))
         end
     end
+    @test ssim(A, B) ≈ ssim(Lab.(A), B) atol=1e-4
 end
