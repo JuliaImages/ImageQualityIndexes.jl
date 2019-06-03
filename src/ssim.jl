@@ -41,12 +41,13 @@ iqi(img, ref)
 [2] Wang, Z., Bovik, A. C., Sheikh, H. R., & Simoncelli, E. P. (2003). The SSIM Index for Image Quality Assessment. Retrived May 30, 2019, from http://www.cns.nyu.edu/~lcv/ssim/
 """
 struct SSIM <: FullReferenceIQI
-    kernel::OffsetArray
+    kernel::AbstractArray{<:Real}
     W::NTuple{3}
     function SSIM(kernel, W)
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
-        all(W .>= 0) || throw(ArgumentError("W should be non-negative"))
-        new(centered(kernel), W)
+        issymetric(kernel) || @warn "SSIM kernel is assumed to be symmetric"
+        all(W .>= 0) || throw(ArgumentError("(α, β, γ) should be non-negative, instead it's $(W)"))
+        new(kernel, W)
     end
 end
 
@@ -78,8 +79,7 @@ const SSIM_K = (0.01, 0.03)
 # other Color3 images are converted to RGB first.
 function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakval = 1.0, K = SSIM_K)
     if size(x) ≠ size(ref)
-        err = ArgumentError("images should be the same size,
-                             instead they're $(size(x))-$(size(ref))")
+        err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
     end
     α, β, γ = iqi.W
@@ -90,7 +90,7 @@ function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakva
     x = of_eltype(T, x)
     ref = of_eltype(T, ref)
 
-    # calculate ssim in the neighborhood of each pixel
+    # calculate ssim in the neighborhood of each pixel, weighted by window
     window = kernelfactors(Tuple(repeated(iqi.kernel, ndims(ref))))
 
     μx = imfilter(x, window)   # equation (14) in [1]
@@ -127,3 +127,11 @@ _ssim_map(iqi::SSIM,
           ref::AbstractArray{<:Color3},
           peakval = 1.0, K = SSIM_K) =
     _ssim_map(iqi, of_eltype(RGB, x), of_eltype(RGB, ref), peakval, K)
+
+
+# helpers
+function issymetric(kernel)
+    origin = first(axes(kernel, 1))
+    center = (length(kernel)-1) ÷ 2 + origin
+    kernel[origin:center] ≈ kernel[end:-1:center]
+end
