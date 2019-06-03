@@ -57,7 +57,7 @@ SSIM(kernel=SSIM_KERNEL) = SSIM(kernel, SSIM_W)
 
 # api
 # By default we don't crop the padding boundary to meet the ssim result from
-# MATLAB Image Processing Toolbox, which is used much broadly than the original
+# MATLAB Image Processing Toolbox, which is used more broadly than the original
 # implementaion [2] (written in MATLAB as well).
 # TODO: add keyword argument "crop=false" for compatibility
 # -- Johnny Chen <johnnychen94@hotmail.com>
