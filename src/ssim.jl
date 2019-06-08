@@ -86,7 +86,7 @@ function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakva
     C₁, C₂ = @. (peakval * K)^2
     C₃ = C₂/2
 
-    T = promote_type(floattype(eltype(ref)), floattype(eltype(x)))
+    T = promote_type(float(eltype(ref)), float(eltype(x)))
     x = of_eltype(T, x)
     ref = of_eltype(T, ref)
 
