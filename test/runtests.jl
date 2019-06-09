@@ -4,7 +4,7 @@ using Statistics
 
 include("testutils.jl")
 
-@testset "SSIM" begin
+@testset "ImageQualityIndexes" begin
 
     include("psnr.jl")
     include("ssim.jl")

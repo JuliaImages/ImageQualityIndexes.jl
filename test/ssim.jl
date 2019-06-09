@@ -25,20 +25,18 @@ using ImageFiltering
     A = [1.0 1.0 1.0; 1.0 1.0 1.0; 0.0 0.0 0.0]
     B = [1.0 1.0 1.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
     for T in type_list
-        @testset "$T" begin
-            test_ndarray(iqi, sz_img_3, T)
+        test_ndarray(iqi, sz_img_3, T)
 
-            a = A .|> T
-            b = B .|> T
+        a = A .|> T
+        b = B .|> T
 
-            @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-            @test ssim(a, a) ≈ 1.0
+        @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test ssim(a, a) ≈ 1.0
 
-            # FIXME: the result of Bool type is not strictly equal to others
-            eltype(T) <: Bool && continue
-            test_numeric(iqi, a, b, T)
-            test_numeric(iqi, channelview(a), channelview(b), T)
-        end
+        # FIXME: the result of Bool type is not strictly equal to others
+        eltype(T) <: Bool && continue
+        test_numeric(iqi, a, b, T)
+        test_numeric(iqi, channelview(a), channelview(b), T)
     end
     test_cross_type(iqi, A, B, type_list)
 
@@ -55,20 +53,18 @@ using ImageFiltering
         RGB(0.0, 1.0, 0.0) RGB(1.0, 0.0, 0.0) RGB(1.0, 0.0, 1.0)
         RGB(0.0, 1.0, 1.0) RGB(1.0, 1.0, 0.0) RGB(0.0, 0.0, 0.0)]
     for T in type_list
-        @testset "$T" begin
-            test_ndarray(iqi, sz_img_3, T)
+        test_ndarray(iqi, sz_img_3, T)
 
-            a = A .|> T
-            b = B .|> T
+        a = A .|> T
+        b = B .|> T
 
-            @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-            @test ssim(a, b) == ssim(channelview(a), channelview(b))
-            @test ssim(a, a) ≈ 1.0
+        @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test ssim(a, b) == ssim(channelview(a), channelview(b))
+        @test ssim(a, a) ≈ 1.0
 
-            # RGB is treated as 3d gray image
-            test_numeric(iqi, a, b, T)
-            test_numeric(iqi, channelview(a), channelview(b), T; filename="references/SSIM_2d_RGB")
-        end
+        # RGB is treated as 3d gray image
+        test_numeric(iqi, a, b, T)
+        test_numeric(iqi, channelview(a), channelview(b), T; filename="references/SSIM_2d_RGB")
     end
     type_list = generate_test_types([Float32, N0f8], [RGB, BGR])
     test_cross_type(iqi, A, B, type_list)
@@ -82,18 +78,16 @@ using ImageFiltering
         RGB(0.0, 1.0, 0.0) RGB(1.0, 0.0, 0.0) RGB(1.0, 0.0, 1.0)
         RGB(0.0, 1.0, 1.0) RGB(1.0, 1.0, 0.0) RGB(0.0, 0.0, 0.0)]
     for T in type_list
-        @testset "$T" begin
-            a = A .|> T
-            b = B .|> T
+        a = A .|> T
+        b = B .|> T
 
-            @test_nowarn ssim(A, b), ssim(a, B)
+        @test_nowarn ssim(A, b), ssim(a, B)
 
-            @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-            @test ssim(A, A) ≈ 1.0
+        @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test ssim(A, A) ≈ 1.0
 
-            # conversion to RGB first differs from no conversion
-            @test ssim(a, b) ≠ ssim(channelview(a), channelview(b))
-        end
+        # conversion to RGB first differs from no conversion
+        @test ssim(a, b) ≠ ssim(channelview(a), channelview(b))
     end
     @test ssim(A, B) ≈ ssim(Lab.(A), B) atol=1e-4
 end
