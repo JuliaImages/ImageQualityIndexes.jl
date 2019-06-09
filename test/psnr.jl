@@ -77,15 +77,6 @@
         a = A .|> T
         b = B .|> T
 
-        # peakval of RGB is inferable
-        @test_nowarn psnr(a, B)
-        @test_throws ArgumentError psnr(A, b)
-
-        # generally, peakval is not inferable
-        @test_throws ArgumentError psnr(a, b)
-        @test_throws ArgumentError psnr(a, b, 1.0)
-        @test_throws ArgumentError psnr(a, b, [1.0])
-
         @test psnr(a, b, [1.0, 1.0, 1.0]) == assess(PSNR(), a, b, [1.0, 1.0, 1.0]) == PSNR()(a, b, [1.0, 1.0, 1.0])
         @test all(isinf.(psnr(A, A, [1.0, 1.0, 1.0])))
     end

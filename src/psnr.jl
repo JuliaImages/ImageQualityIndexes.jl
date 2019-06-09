@@ -31,13 +31,10 @@ psnr(x, ref) = psnr(x, ref, peak_value(eltype(ref)))
 
 
 # implementation
-""" Define the default peakval for colors """
+""" Define the default peakval for colors, specialize gray and rgb to get scalar output"""
+peak_value(::Type{T}) where T <: Colorant = gamutmax(T)
 peak_value(::Type{T}) where T <: NumberLike = one(eltype(T))
 peak_value(::Type{T}) where T <: AbstractRGB = one(eltype(T))
-function peak_value(::Type{T}) where T <: Color3
-    err_msg = "peakval for PSNR can't be inferred and should be explicitly passed for $(T) images"
-    throw(ArgumentError(err_msg))
-end
 
 _psnr(x::GenericGrayImage, ref::GenericGrayImage, peakval::Real)::Real =
     20log10(peakval) - 10log10(mse(x, ref))
