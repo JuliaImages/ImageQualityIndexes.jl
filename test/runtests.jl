@@ -1,10 +1,10 @@
 using ImageQualityIndexes
-using Test, ReferenceTests, TestImages
+using Test, ReferenceTests, TestImages, ImageFiltering
 using Statistics
 
 include("testutils.jl")
 
-@testset "SSIM" begin
+@testset "ImageQualityIndexes" begin
 
     include("psnr.jl")
     include("ssim.jl")

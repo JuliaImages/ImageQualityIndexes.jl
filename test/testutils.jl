@@ -35,12 +35,9 @@ function test_numeric(dist, a, b, T; filename=nothing)
             filename = filename * "_$(_base_colorant_type(T))"
         end
     end
-    @testset "numeric" begin
-        @testset "$T" begin
-            # @test_reference "$(filename)_$(eltype(a))_$(eltype(b)).txt" assess(dist, a, b)
-            @test_reference "$(filename).txt" Float64(assess(dist, a, b))
-        end
-    end
+
+    # @test_reference "$(filename)_$(eltype(a))_$(eltype(b)).txt" assess(dist, a, b)
+    @test_reference "$(filename).txt" Float64(assess(dist, a, b))
 end
 
 """
