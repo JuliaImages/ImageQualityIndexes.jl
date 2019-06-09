@@ -59,5 +59,10 @@ function test_ndarray(d, sz, T)
     @test_nowarn assess(d, x, y)
 
     T <: AbstractGray || return nothing
-    @test assess(d, x, y) ≈ assess(d, channelview(x), channelview(y)) rtol=1e-5
+    for _ in 1:10
+        x = rand(T, sz)
+        y = rand(T, sz)
+
+        @test assess(d, x, y) ≈ assess(d, channelview(x), channelview(y)) atol=1e-4
+    end
 end
