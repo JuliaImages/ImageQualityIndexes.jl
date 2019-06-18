@@ -10,6 +10,7 @@ using Base.Iterators: repeated
 include("generic.jl")
 include("psnr.jl")
 include("ssim.jl")
+include("colorfulness.jl")
 
 export
     # generic
@@ -21,6 +22,10 @@ export
 
     # Structral Similarity
     SSIM,
-    ssim
+    ssim,
+
+    # Colorfulness
+    HASLER_AND_SUSSTRUNK_M3,
+    colorfulness
 
 end # module
