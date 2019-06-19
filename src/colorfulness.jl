@@ -1,16 +1,11 @@
 using ImageCore: GenericGrayImage
 using Statistics: mean, std
 
-struct HASLER_AND_SUSSTRUNK_M3 <: NoReferenceIQI end
-
-# api
-(iqi::HASLER_AND_SUSSTRUNK_M3)(img) = colorfulness(img, HASLER_AND_SUSSTRUNK_M3())
-
 """
 
-```
-M =  colorfulness(img)
-```
+    HASLER_AND_SUSSTRUNK_M3 <: NoReferenceIQI
+    M =  hasler_and_susstrunk_m3(img)
+    M =  colorfulness(img)
 
 Calculates the colorfulness of an RGB image according to the metric,
 M3 from [1]. As a guide to interpretation of results, the authors
@@ -30,7 +25,36 @@ in natural images. In Human vision and electronic imaging VIII
 Photonics.
 
 """
-function colorfulness(img::AbstractArray{<:AbstractRGB}, m::HASLER_AND_SUSSTRUNK_M3)
+struct HASLER_AND_SUSSTRUNK_M3 <: NoReferenceIQI end
+
+# api
+(iqi::HASLER_AND_SUSSTRUNK_M3)(img) = hasler_and_susstrunk_m3(img)
+
+
+"""
+
+
+    M =  hasler_and_susstrunk_m3(img)
+
+Calculates the colorfulness of an RGB image according to the metric,
+M3 from [1]. As a guide to interpretation of results, the authors
+suggest:
+
+|Not colorful        |  0|
+|slightly colorful   | 15|
+|moderately colorful | 33|
+|averagely colorful  | 45|
+|quite colorful      | 59|
+|highly colorful     | 82|
+|extremely colorful  |109|
+
+[1] Hasler, D. and Süsstrunk, S.E., 2003, June. Measuring colorfulness
+in natural images. In Human vision and electronic imaging VIII
+(Vol. 5007, pp. 87-96). International Society for Optics and
+Photonics.
+
+"""
+function hasler_and_susstrunk_m3(img::AbstractArray{<:AbstractRGB})
 
     R = 255 .* float(red.(img))
     G = 255 .* float(green.(img))
@@ -49,8 +73,9 @@ function colorfulness(img::AbstractArray{<:AbstractRGB}, m::HASLER_AND_SUSSTRUNK
 
 end
 
-colorfulness(img::GenericGrayImage, m::HASLER_AND_SUSSTRUNK_M3) = 0
+hasler_and_susstrunk_m3(img::GenericGrayImage) = 0
 
-colorfulness(img) = colorfulness(img, HASLER_AND_SUSSTRUNK_M3())
+colorfulness(img, m::HASLER_AND_SUSSTRUNK_M3) = hasler_and_susstrunk_m3(img)
+colorfulness(img) = hasler_and_susstrunk_m3(img)
 
 
