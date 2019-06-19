@@ -30,30 +30,6 @@ struct HASLER_AND_SUSSTRUNK_M3 <: NoReferenceIQI end
 # api
 (iqi::HASLER_AND_SUSSTRUNK_M3)(img) = hasler_and_susstrunk_m3(img)
 
-
-"""
-
-
-    M =  hasler_and_susstrunk_m3(img)
-
-Calculates the colorfulness of an RGB image according to the metric,
-M3 from [1]. As a guide to interpretation of results, the authors
-suggest:
-
-|Not colorful        |  0|
-|slightly colorful   | 15|
-|moderately colorful | 33|
-|averagely colorful  | 45|
-|quite colorful      | 59|
-|highly colorful     | 82|
-|extremely colorful  |109|
-
-[1] Hasler, D. and Süsstrunk, S.E., 2003, June. Measuring colorfulness
-in natural images. In Human vision and electronic imaging VIII
-(Vol. 5007, pp. 87-96). International Society for Optics and
-Photonics.
-
-"""
 function hasler_and_susstrunk_m3(img::AbstractArray{<:AbstractRGB})
 
     R = 255 .* float(red.(img))
