@@ -27,6 +27,7 @@ struct HASLER_AND_SUSSTRUNK_M3 <: NoReferenceIQI end
 # api
 (iqi::HASLER_AND_SUSSTRUNK_M3)(img) = hasler_and_susstrunk_m3(img)
 
+@doc (@doc HASLER_AND_SUSSTRUNK_M3)
 function hasler_and_susstrunk_m3(img::AbstractArray{<:AbstractRGB})
 
     R = 255 .* float(red.(img))
@@ -46,9 +47,32 @@ function hasler_and_susstrunk_m3(img::AbstractArray{<:AbstractRGB})
 
 end
 
+@doc (@doc HASLER_AND_SUSSTRUNK_M3)
 hasler_and_susstrunk_m3(img::GenericGrayImage) = 0
 
-colorfulness(img, m::HASLER_AND_SUSSTRUNK_M3) = hasler_and_susstrunk_m3(img)
-colorfulness(img) = hasler_and_susstrunk_m3(img)
+"""
+     M =  colorfulness(HASLER_AND_SUSSTRUNK_M3(), img)
+
+Measures the colorfulness of an image using Method 3 from [1].
+
+[1] Hasler, D. and Süsstrunk, S.E., 2003, June. Measuring colorfulness
+in natural images. In Human vision and electronic imaging VIII
+(Vol. 5007, pp. 87-96). International Society for Optics and
+Photonics.
+"""
+colorfulness(m::HASLER_AND_SUSSTRUNK_M3, img) = m(img)
+
+"""
+     M =  colorfulness(img)
+
+Measures the colorfulness of an image using the default
+algorithm which is currently Method 3 from [1].
+
+[1] Hasler, D. and Süsstrunk, S.E., 2003, June. Measuring colorfulness
+in natural images. In Human vision and electronic imaging VIII
+(Vol. 5007, pp. 87-96). International Society for Optics and
+Photonics.
+"""
+colorfulness(img) = HASLER_AND_SUSSTRUNK_M3()(img)
 
 

@@ -40,7 +40,7 @@
     
     c1 = colorfulness(imga)
     c2 = hasler_and_susstrunk_m3(imga)
-    c3 = colorfulness(imga, HASLER_AND_SUSSTRUNK_M3())
+    c3 = colorfulness(HASLER_AND_SUSSTRUNK_M3(), imga)
     c4 = assess(HASLER_AND_SUSSTRUNK_M3(), imga)
 
     @test c1 == c2 == c3 == c4
