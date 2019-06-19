@@ -11,7 +11,7 @@ ImageQualityIndexes provides the basic image quality assessment methods.
 
 * `PSNR`/`psnr` -- Peak signal-to-noise ratio
 * `SSIM`/`ssim` -- Structural similarity
-
+* `HASLER_AND_SUSSTRUNK_M3`/`hasler_and_susstrunk_m3` -- Colorfulness
 
 ## Basic usage
 
@@ -40,4 +40,8 @@ kernel = ones(3, 3)./9 # mean filter
 denoised_img = imfilter(noisy_img, kernel)
 ssim(denoised_img, img) # 0.6529
 psnr(denoised_img, img) # 26.0350
+
+img = testimage("lena_color_256");
+colorfulness(img) # 64.1495
+
 ```
