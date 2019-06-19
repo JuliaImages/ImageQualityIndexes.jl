@@ -4,9 +4,9 @@
     M =  hasler_and_susstrunk_m3(img)
     M =  colorfulness(img)
 
-Calculates the colorfulness of an RGB image according to the metric,
-M3 from [1]. As a guide to interpretation of results, the authors
-suggest:
+Calculates the colorfulness of a natural RGB image according to the
+metric, M3 from [1]. As a guide to interpretation of results, the
+authors suggest:
 
 |Not colorful        |  0|
 |slightly colorful   | 15|
@@ -53,7 +53,7 @@ hasler_and_susstrunk_m3(img::GenericGrayImage) = 0
 """
      M =  colorfulness(HASLER_AND_SUSSTRUNK_M3(), img)
 
-Measures the colorfulness of an image using Method 3 from [1].
+Measures the colorfulness of a natural image using Method 3 from [1].
 
 [1] Hasler, D. and Süsstrunk, S.E., 2003, June. Measuring colorfulness
 in natural images. In Human vision and electronic imaging VIII
@@ -65,7 +65,7 @@ colorfulness(m::HASLER_AND_SUSSTRUNK_M3, img) = m(img)
 """
      M =  colorfulness(img)
 
-Measures the colorfulness of an image using the default
+Measures the colorfulness of a natural image using the default
 algorithm which is currently Method 3 from [1].
 
 [1] Hasler, D. and Süsstrunk, S.E., 2003, June. Measuring colorfulness
