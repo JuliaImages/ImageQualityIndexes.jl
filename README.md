@@ -11,6 +11,9 @@ ImageQualityIndexes provides the basic image quality assessment methods.
 
 * `PSNR`/`psnr` -- Peak signal-to-noise ratio
 * `SSIM`/`ssim` -- Structural similarity
+
+### No-reference indexes
+
 * `HASLER_AND_SUSSTRUNK_M3`/`hasler_and_susstrunk_m3` -- Colorfulness
 
 ## Basic usage
