@@ -1,6 +1,3 @@
-using ImageCore: GenericGrayImage
-using Statistics: mean, std
-
 """
 
     HASLER_AND_SUSSTRUNK_M3 <: NoReferenceIQI

@@ -4,7 +4,7 @@ using MappedArrays, OffsetArrays
 using ImageCore, ColorVectorSpace
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
 using ImageDistances, ImageFiltering
-using Statistics: mean
+using Statistics: mean, std
 using Base.Iterators: repeated
 
 include("generic.jl")
