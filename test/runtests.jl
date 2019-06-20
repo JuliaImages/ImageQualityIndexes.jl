@@ -8,7 +8,8 @@ include("testutils.jl")
 
     include("psnr.jl")
     include("ssim.jl")
-
+    include("colorfulness.jl")
+    
 end
 
 nothing
