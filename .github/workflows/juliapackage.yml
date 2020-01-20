@@ -27,6 +27,7 @@ jobs:
       - name: "Upload coverage report"
         # since secrets aren't passed by a PR from another fork, we don't upload
         # coverage for such PRs
+        if: ${{ matrix.os }} == "Linux"
         run: |
           if [[ ! -z $CODECOV_TOKEN ]]; then \
             julia -e 'using Pkg; Pkg.add("Coverage")' ; \
