@@ -1,0 +1,43 @@
+name: Unit test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        julia-version: ['1.0', '1.3', 'nightly']
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - uses: actions/checkout@v1.0.0
+      - name: "Set up Julia"
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: "Unit Test"
+        uses: julia-actions/julia-runtest@master
+
+      - name: "Upload coverage report"
+        # since secrets aren't passed by a PR from another fork, we don't upload
+        # coverage for such PRs
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          if [[ ! -z $CODECOV_TOKEN ]]; then \
+            julia -e 'using Pkg; Pkg.add("Coverage")' ; \
+            julia -e 'using Coverage; Codecov.submit_local(process_folder())' ; \
+          fi
+        env:
+            # unless tokenless upload is enabled, we can only submit coverage via
+            # environment variable.
+            # See issue: https://github.com/julia-actions/julia-uploadcodecov/issues/1
+            #
+            # generated from https://codecov.io/gh/JuliaImages/ImageQualityIndexes.jl/settings
+            # add it to https://github.com/JuliaImages/ImageQualityIndexes.jl/settings/secrets
+            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

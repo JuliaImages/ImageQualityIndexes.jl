@@ -1,6 +1,7 @@
 # ImageQualityIndexes
 
-[![Build Status](https://travis-ci.org/JuliaImages/ImageQualityIndexes.jl.svg?branch=master)](https://travis-ci.org/JuliaImages/ImageQualityIndexes.jl)
+[![Actions Status](https://github.com/JuliaImages/ImageQualityIndexes.jl/workflows/Unit%20test/badge.svg
+)](https://github.com/JuliaImages/ImageQualityIndexes.jl/actions)
 [![Codecov](https://codecov.io/gh/JuliaImages/ImageQualityIndexes.jl/badge.svg?branch=master)](https://codecov.io/gh/JuliaImages/ImageQualityIndexes.jl)
 
 ImageQualityIndexes provides the basic image quality assessment methods. Check the reasoning behind the code design [here](https://nextjournal.com/johnnychen94/the-principles-of-imagesjl-part-i) if you're interested in.
