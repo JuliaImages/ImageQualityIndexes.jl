@@ -1,8 +1,8 @@
 # ImageQualityIndexes
 
-[![Actions Status](https://github.com/JuliaImages/ImageQualityIndexes.jl/workflows/Unit%20test/badge.svg
-)](https://github.com/JuliaImages/ImageQualityIndexes.jl/actions)
-[![Codecov](https://codecov.io/gh/JuliaImages/ImageQualityIndexes.jl/badge.svg?branch=master)](https://codecov.io/gh/JuliaImages/ImageQualityIndexes.jl)
+[![][action-img]][action-url]
+[![][pkgeval-img]][pkgeval-url]
+[![][codecov-img]][codecov-url]
 
 ImageQualityIndexes provides the basic image quality assessment methods. Check the reasoning behind the code design [here](https://nextjournal.com/johnnychen94/the-principles-of-imagesjl-part-i) if you're interested in.
 
@@ -49,3 +49,12 @@ img = testimage("lena_color_256");
 colorfulness(img) # 64.1495
 
 ```
+
+<!-- URLS -->
+
+[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/ImageQualityIndexes.svg
+[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
+[action-img]: https://github.com/JuliaImages/ImageQualityIndexes.jl/workflows/Unit%20test/badge.svg
+[action-url]: https://github.com/JuliaImages/ImageQualityIndexes.jl/actions
+[codecov-img]: https://codecov.io/github/JuliaImages/ImageQualityIndexes.jl/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/JuliaImages/ImageQualityIndexes.jl?branch=master
