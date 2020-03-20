@@ -11,6 +11,7 @@ include("generic.jl")
 include("psnr.jl")
 include("ssim.jl")
 include("colorfulness.jl")
+include("deprecations.jl")
 
 export
     # generic
@@ -18,11 +19,11 @@ export
 
     # Peak signal-to-noise ratio
     PSNR,
-    psnr,
+    assess_psnr,
 
     # Structral Similarity
     SSIM,
-    ssim,
+    assess_ssim,
 
     # Colorfulness
     HASLER_AND_SUSSTRUNK_M3,

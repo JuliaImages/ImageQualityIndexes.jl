@@ -15,7 +15,7 @@ using ImageFiltering
     # numerical test
     img1 = testimage("cameraman")
     img2 = testimage("lena_gray_512")
-    @test ssim(img1, img2) ≈ 0.3595 atol=1e-4 # MATLAB built-in ssim result
+    @test assess_ssim(img1, img2) ≈ 0.3595 atol=1e-4 # MATLAB built-in ssim result
     iqi_δ = SSIM(KernelFactors.gaussian(1.5, 11), (1.0+1e-5, 1.0, 1.0))
     @test assess(iqi_δ, img1, img2) ≈ assess(SSIM(), img1, img2) atol = 1e-4
 
@@ -30,8 +30,8 @@ using ImageFiltering
         a = A .|> T
         b = B .|> T
 
-        @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-        @test ssim(a, a) ≈ 1.0
+        @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test assess_ssim(a, a) ≈ 1.0
 
         # FIXME: the result of Bool type is not strictly equal to others
         eltype(T) <: Bool && continue
@@ -43,7 +43,7 @@ using ImageFiltering
     # RGB image
     img1 = testimage("mandril_color")
     img2 = testimage("lena_color_512")
-    @test ssim(img1, img2) ≈ 0.0664 atol=1e-4 # MATLAB built-in ssim result
+    @test assess_ssim(img1, img2) ≈ 0.0664 atol=1e-4 # MATLAB built-in assess_ssim result
 
     type_list = generate_test_types([Float32, N0f8], [RGB])
     A = [RGB(0.0, 0.0, 0.0) RGB(0.0, 1.0, 0.0) RGB(0.0, 1.0, 1.0)
@@ -58,9 +58,9 @@ using ImageFiltering
         a = A .|> T
         b = B .|> T
 
-        @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-        @test ssim(a, b) == ssim(channelview(a), channelview(b))
-        @test ssim(a, a) ≈ 1.0
+        @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test assess_ssim(a, b) == assess_ssim(channelview(a), channelview(b))
+        @test assess_ssim(a, a) ≈ 1.0
 
         # RGB is treated as 3d gray image
         test_numeric(iqi, a, b, T)
@@ -81,13 +81,13 @@ using ImageFiltering
         a = A .|> T
         b = B .|> T
 
-        @test_nowarn ssim(A, b), ssim(a, B)
+        @test_nowarn assess_ssim(A, b), assess_ssim(a, B)
 
-        @test ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-        @test ssim(A, A) ≈ 1.0
+        @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test assess_ssim(A, A) ≈ 1.0
 
         # conversion to RGB first differs from no conversion
-        @test ssim(a, b) ≠ ssim(channelview(a), channelview(b))
+        @test assess_ssim(a, b) ≠ assess_ssim(channelview(a), channelview(b))
     end
-    @test ssim(A, B) ≈ ssim(Lab.(A), B) atol=1e-4
+    @test assess_ssim(A, B) ≈ assess_ssim(Lab.(A), B) atol=1e-4
 end

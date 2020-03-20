@@ -9,6 +9,7 @@ include("testutils.jl")
     include("psnr.jl")
     include("ssim.jl")
     include("colorfulness.jl")
+    include("deprecations.jl")
     
 end
 
