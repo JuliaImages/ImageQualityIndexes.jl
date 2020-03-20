@@ -1,7 +1,7 @@
 """
     SSIM([kernel], [(α, β, γ)]) <: FullReferenceIQI
     assess(iqi::SSIM, img, ref)
-    ssim(img, ref)
+    assess_ssim(img, ref)
 
 Structural similarity (SSIM) index is an image quality assessment method based
 on degradation of structural information.
@@ -65,7 +65,7 @@ SSIM(kernel=SSIM_KERNEL) = SSIM(kernel, SSIM_W)
 (iqi::SSIM)(x, ref) = mean(_ssim_map(iqi, x, ref))
 
 @doc (@doc SSIM)
-ssim(x, ref) = SSIM()(x, ref)
+assess_ssim(x, ref) = SSIM()(x, ref)
 
 # Parameters `(K₁, K₂)` are used to avoid instability when denominator is very
 # close to zero. Different from origianl implementation [2], we don't make it
