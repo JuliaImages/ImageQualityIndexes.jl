@@ -18,13 +18,13 @@ By default `kernel = KernelFactors.gaussian(1.5, 11)`.
 !!! info
 
     SSIM is defined only for gray images. RGB images are treated as 3d Gray
-    images. General `Color3` images are converted to RGB images first, in which
-    case, you could manually expand them using `channelview` if you don't want
-    them converted to RGB first.
+    images. General `Color3` images are converted to RGB images first, you could
+    manually expand them using `channelview` if you don't want them converted to
+    RGB first.
 
 # Example
 
-`ssim(img, ref)` should be sufficient to get a benchmark for algorithms. One
+`assess_ssim(img, ref)` should be sufficient to get a benchmark for algorithms. One
 could also instantiate a customed SSIM, then pass it to `assess` or use it as a
 function. For example:
 
