@@ -67,8 +67,6 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
     # downsampling window
     window = kernelfactors(Tuple(repeated(DOWNSAMPLE_FILTER, ndims(ref))))
 
-    # Check window
-    println(window)
     mean_cs = []
     for i in 1:N-1
         cs = SSIM(iqi.kernel, (zero(typeof(iqi.W[i])), iqi.W[i], iqi.W[i]))(x, ref)
