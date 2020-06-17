@@ -10,7 +10,7 @@ using Base.Iterators: repeated
 include("generic.jl")
 include("psnr.jl")
 include("ssim.jl")
-include("mssim.jl")
+include("msssim.jl")
 include("colorfulness.jl")
 include("deprecations.jl")
 
@@ -27,8 +27,8 @@ export
     assess_ssim,
 
     # Multi Scale Structural Similarity
-    MSSIM,
-    assess_mssim,
+    MSSSIM,
+    assess_msssim,
 
     # Colorfulness
     HASLER_AND_SUSSTRUNK_M3,
