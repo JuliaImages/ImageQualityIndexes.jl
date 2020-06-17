@@ -48,27 +48,35 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
 
     # TODO: check that the image can be downsampled enough number of times, and other checks
 
-    N = length(iqi.W) # number of scales
+    level = length(iqi.W) # number of scales
     T = promote_type(float(eltype(ref)), float(eltype(x)))
     x = of_eltype(T, x)
     ref = of_eltype(T, ref)
 
-    size_x, size_y = size(x)
+    N, M = size(x)
 
     # check if images are smaller than kernel
-    (size_x < 11 || size_y < 11) && throw(ArgumentError("imges should be greater than 11x11"))
+    (N < 11 || M < 11) && throw(ArgumentError("imges should be greater than 11x11"))
 
     # check if no. of levels are >= 1 
-    N < 1 && throw(ArgumentError("MS-SSIM need at least one weight"))
+    level < 1 && throw(ArgumentError("MS-SSIM need at least one weight"))
 
     # check if weights are valid - as per authors implementaion
     sum(iqi.W) == 0 && throw(ArgumentError("MS-SSIM weight must have at least one weight > 0"))
     
+    # check if kernel can be applied
+
+    (H,) = size(iqi.kernel)
+    min_img_width = min(M, N)/(2^(level-1));
+    max_win_width = H;
+    
+    ((H*N)<4 || (H>M) || (H>N) || (min_img_width < max_win_width)) && throw(ArgumentError("kernel can not applied for given dimention of image"))
+
     # downsampling window
     window = kernelfactors(Tuple(repeated(DOWNSAMPLE_FILTER, ndims(ref))))
 
     mean_cs = []
-    for i in 1:N-1
+    for i in 1:level-1
         cs = SSIM(iqi.kernel, (zero(typeof(iqi.W[i])), iqi.W[i], iqi.W[i]))(x, ref)
         append!(mean_cs, cs)
 
