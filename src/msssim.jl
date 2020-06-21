@@ -65,11 +65,11 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
     
     # check if kernel can be applied
 
-    (H,) = size(iqi.kernel)
-    min_img_width = min(M, N)/(2^(level-1));
-    max_win_width = H;
+    # (H,) = size(iqi.kernel)
+    # min_img_width = min(M, N)/(2^(level-1));
+    # max_win_width = H;
     
-    ((H*N)<4 || (H>M) || (H>N) || (min_img_width < max_win_width)) && throw(ArgumentError("kernel can not applied for given dimention of image"))
+    # ((H*N)<4 || (H>M) || (H>N) || (min_img_width < max_win_width)) && throw(ArgumentError("kernel can not applied for given dimention of image"))
 
     # downsampling window
     window = kernelfactors(Tuple(repeated(DOWNSAMPLE_FILTER, ndims(ref))))
