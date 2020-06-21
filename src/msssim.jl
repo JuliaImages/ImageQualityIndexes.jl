@@ -53,8 +53,7 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
     x = of_eltype(T, x)
     ref = of_eltype(T, ref)
 
-    N, M = size(x)
-
+    N,M = size(x)[end-1:end]
     # check if images are smaller than kernel
     (N < 11 || M < 11) && throw(ArgumentError("imges should be greater than 11x11"))
 
@@ -84,8 +83,13 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
         imfilter(ref, window, "symmetric")
 
         # downsampling
-        x = x[1:2:end, 1:2:end]
-        ref = ref[1:2:end, 1:2:end]
+        if (ndims(x)==2)
+            x = x[1:2:end, 1:2:end]
+            ref = ref[1:2:end, 1:2:end]
+        else
+            x = x[1:end,1:2:end, 1:2:end]
+            y = ref = ref[1:end, 1:2:end, 1:2:end]
+        end
     end
 
     # last scale
