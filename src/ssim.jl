@@ -22,6 +22,11 @@ By default `kernel = KernelFactors.gaussian(1.5, 11)`.
     manually expand them using `channelview` if you don't want them converted to
     RGB first.
 
+!!! tip
+
+    The default parameters comes from [1]. For benchmark usage, it is recommended to not
+    change the parameters, because most other SSIM implementations follows the same settings.
+
 # Example
 
 `assess_ssim(img, ref)` should be sufficient to get a benchmark for algorithms. One
