@@ -116,6 +116,11 @@ function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakva
         c = @. (2σx_σy + C₂)/(σx² + σy² + C₂) # equation (9) in [1]
         s = @. (σxy + C₃)/(σx_σy + C₃) # equation (10) in [1]
 
+        # ensure that negative numbers in s are not being raised to powers less
+        # than 1, non-standard implementation
+        if γ < 1.0
+            s = max.(s, zero(eltype(s)))
+        end
         ssim_map = @. l^α * c^β * s^γ # equation (12) in [1]
     end
     return ssim_map

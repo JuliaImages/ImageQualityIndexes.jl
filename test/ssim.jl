@@ -19,6 +19,10 @@ using ImageFiltering
     iqi_δ = SSIM(KernelFactors.gaussian(1.5, 11), (1.0+1e-5, 1.0, 1.0))
     @test assess(iqi_δ, img1, img2) ≈ assess(SSIM(), img1, img2) atol = 1e-4
 
+    # non-standard powers
+    iqi_γ = SSIM(KernelFactors.gaussian(1.5, 11), (0.5, 0.5, 0.5))
+    @test iqi_γ(img1, img2) ≈ 0.5261 atol=1e-4
+    # non standard parameters, result may differ from other implementations
 
     # Gray image
     type_list = generate_test_types([Bool, Float32, N0f8], [Gray])
