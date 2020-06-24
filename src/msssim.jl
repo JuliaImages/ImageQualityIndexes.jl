@@ -40,7 +40,7 @@ assess_msssim(x, ref) = MSSSIM()(x, ref)
 const DOWNSAMPLE_FILTER = ones(2, 2)./4 # as per author's implementaion
 
 # SSIM does not allow for user specifying peakval and K, so we don't allow it here either
-function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
+function _msssim_map(iqi::MSSSIM, x::GenericImage, ref::GenericImage)
     if size(x) ≠ size(ref)
         err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
@@ -68,7 +68,7 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
     # (H,) = size(iqi.kernel)
     # min_img_width = min(M, N)/(2^(level-1));
     # max_win_width = H;
-    
+
     # ((H*N)<4 || (H>M) || (H>N) || (min_img_width < max_win_width)) && throw(ArgumentError("kernel can not applied for given dimention of image"))
 
     # downsampling window
@@ -83,32 +83,16 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
         imfilter(ref, window, "symmetric")
 
         # downsampling
-        if (ndims(x)==2)
-            x = x[1:2:end, 1:2:end]
-            ref = ref[1:2:end, 1:2:end]
-        else
-            x = x[1:end,1:2:end, 1:2:end]
-            y = ref = ref[1:end, 1:2:end, 1:2:end]
-        end
+        x = x[ntuple(i->first(axes(x, i)) : 2 : last(axes(x, i)), ndims(x))...]
+        ref = ref[ntuple(i->first(axes(ref, i)) : 2 : last(axes(ref, i)), ndims(ref))...]
     end
 
     # last scale
     lcs = SSIM(iqi.kernel, (iqi.W[end][1], iqi.W[end][2], iqi.W[end][3]))(x, ref)
     append!(mean_cs, lcs)
 
-    return min.(prod(mean_cs), 1)
+    return min(prod(mean_cs), 1.0)
 
     # TODO: Add sum option as well from author's implementaion
 
 end
-
-
-_msssim_map(iqi::MSSSIM,
-          x::AbstractArray{<:AbstractRGB},
-          ref::AbstractArray{<:AbstractRGB}) =
-    _msssim_map(iqi, channelview(x), channelview(ref))
-
-_msssim_map(iqi::MSSSIM,
-        x::AbstractArray{<:Color3},
-        ref::AbstractArray{<:Color3}) =
-    _msssim_map(iqi, of_eltype(RGB, x), of_eltype(RGB, ref))
