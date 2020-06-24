@@ -16,22 +16,22 @@ Computes the MS-SSIM between two images.
 """
 struct MSSSIM{N} <: FullReferenceIQI
     kernel::AbstractArray{<:Real}
-    W::NTuple{N} # number of scales inferred from length
+    W::NTuple{N, <:Tuple} # number of scales inferred from length
     function MSSSIM(kernel, W)
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "MSSSIM kernel is assumed to be symmetric"
-        all(W .>= 0) || throw(ArgumentError("α, β, γ should be non-negative for all scales, instead it's $(W)"))
+        all(length.(W) .== 3) || throw(ArgumentError("(α, β, γ) required for all scales, instead it's $(W)"))
+        all([ all(x .>= 0) for x in W ]) || throw(ArgumentError("α, β, γ should be non-negative for all scales, instead it's $(W)"))
         new{length(W)}(kernel, W)
     end
 end
 
-# Separate dispatches for Gray, RGB and Color3
-
-# USE SSIM_KERNEL as default kernel
-
 # Weights for α, β, γ in [1]
 const MSSSIM_W = (0.0448, 0.2856, 0.3001, 0.2363, 0.1333) # α, β, γ for scales 1 through 5
 
+MSSSIM(kernel, W::NTuple{N, <:Real}) where N = MSSSIM(kernel, map(x->(x, x, x), W)) # shorthand for αᵢ=βᵢ=γᵢ for all scales i
+
+# USE SSIM_KERNEL as default kernel
 MSSSIM(kernel=SSIM_KERNEL) = MSSSIM(kernel, MSSSIM_W)
 
 (iqi::MSSSIM)(x, ref) = _msssim_map(iqi, x, ref)
@@ -57,12 +57,12 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
     # check if images are smaller than kernel
     (N < 11 || M < 11) && throw(ArgumentError("imges should be greater than 11x11"))
 
-    # check if no. of levels are >= 1 
-    level < 1 && throw(ArgumentError("MS-SSIM need at least one weight"))
+    # check if no. of levels are >= 1
+    level < 1 && throw(ArgumentError("MS-SSIM needs at least one weight"))
 
     # check if weights are valid - as per authors implementaion
-    sum(iqi.W) == 0 && throw(ArgumentError("MS-SSIM weight must have at least one weight > 0"))
-    
+    sum(sum.(iqi.W)) == 0 && throw(ArgumentError("MS-SSIM must have at least one weight > 0"))
+
     # check if kernel can be applied
 
     # (H,) = size(iqi.kernel)
@@ -76,7 +76,7 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
 
     mean_cs = []
     for i in 1:level-1
-        cs = SSIM(iqi.kernel, (zero(typeof(iqi.W[i])), iqi.W[i], iqi.W[i]))(x, ref)
+        cs = SSIM(iqi.kernel, (zero(typeof(iqi.W[i][1])), iqi.W[i][2], iqi.W[i][3]))(x, ref)
         append!(mean_cs, cs)
 
         imfilter(x, window, "symmetric")
@@ -93,7 +93,7 @@ function _msssim_map(iqi::MSSSIM, x::GenericGrayImage, ref::GenericGrayImage)
     end
 
     # last scale
-    lcs = SSIM(iqi.kernel, (iqi.W[end], iqi.W[end], iqi.W[end]))(x, ref)
+    lcs = SSIM(iqi.kernel, (iqi.W[end][1], iqi.W[end][2], iqi.W[end][3]))(x, ref)
     append!(mean_cs, lcs)
 
     return min.(prod(mean_cs), 1)
