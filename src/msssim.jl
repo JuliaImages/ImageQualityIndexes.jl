@@ -34,13 +34,12 @@ MSSSIM(kernel, W::NTuple{N, <:Real}) where N = MSSSIM(kernel, map(x->(x, x, x), 
 # USE SSIM_KERNEL as default kernel
 MSSSIM(kernel=SSIM_KERNEL) = MSSSIM(kernel, MSSSIM_W)
 
-(iqi::MSSSIM)(x, ref) = _msssim_map(iqi, x, ref)
 assess_msssim(x, ref) = MSSSIM()(x, ref)
 
 const DOWNSAMPLE_FILTER = ones(2, 2)./4 # as per author's implementaion
 
 # SSIM does not allow for user specifying peakval and K, so we don't allow it here either
-function _msssim_map(iqi::MSSSIM, x::GenericImage, ref::GenericImage)
+function (iqi::MSSSIM)(x::GenericImage, ref::GenericImage)
     if size(x) ≠ size(ref)
         err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
