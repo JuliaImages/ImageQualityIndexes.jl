@@ -35,7 +35,7 @@ For detailed usage of particular index, please check the docstring (e.g., `?PSNR
 using Images, TestImages
 using ImageQualityIndexes
 
-img = testimage("lena_gray_256") .|> float64
+img = testimage("lena_gray_256") .|> Float64
 noisy_img = img .+ 0.1 .* randn(size(img))
 assess_ssim(noisy_img, img) # 0.3577
 assess_psnr(noisy_img, img) # 19.9941
