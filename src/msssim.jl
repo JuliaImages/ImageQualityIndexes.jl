@@ -64,8 +64,8 @@ function (iqi::MSSSIM)(x::GenericImage, ref::GenericImage)
         cs = SSIM(iqi.kernel, (zero(typeof(iqi.W[i][1])), iqi.W[i][2], iqi.W[i][3]))(x, ref)
         append!(mean_cs, cs)
 
-        imfilter(x, window, "symmetric")
-        imfilter(ref, window, "symmetric")
+        x = imfilter(x, window, "symmetric")
+        ref = imfilter(ref, window, "symmetric")
 
         # downsampling
         x = x[ntuple(i->first(axes(x, i)) : 2 : last(axes(x, i)), ndims(x))...]
