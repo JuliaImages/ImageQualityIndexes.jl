@@ -39,7 +39,11 @@ assess_msssim(x, ref) = MSSSIM()(x, ref)
 const DOWNSAMPLE_FILTER = ones(2, 2)./4 # as per author's implementaion
 
 # SSIM does not allow for user specifying peakval and K, so we don't allow it here either
-function (iqi::MSSSIM)(x::GenericImage, ref::GenericImage)
+
+(iqi::MSSSIM)(x::AbstractArray{<:Color3}, ref::AbstractArray{<:Color3}) =
+    iqi(of_eltype(RGB, x), of_eltype(RGB, ref))
+
+function (iqi::MSSSIM)(x::Union{GenericGrayImage, AbstractArray{<:AbstractRGB}}, ref::Union{GenericGrayImage, AbstractArray{<:AbstractRGB}})
     if size(x) ≠ size(ref)
         err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
@@ -59,7 +63,7 @@ function (iqi::MSSSIM)(x::GenericImage, ref::GenericImage)
     # downsampling window
     window = kernelfactors(Tuple(repeated(DOWNSAMPLE_FILTER, ndims(ref))))
 
-    mean_cs = []
+    mean_cs = Float64[]
     for i in 1:level-1
         cs = SSIM(iqi.kernel, (zero(typeof(iqi.W[i][1])), iqi.W[i][2], iqi.W[i][3]))(x, ref)
         append!(mean_cs, cs)
@@ -77,7 +81,5 @@ function (iqi::MSSSIM)(x::GenericImage, ref::GenericImage)
     append!(mean_cs, lcs)
 
     return min(prod(mean_cs), 1.0)
-
-    # TODO: Add sum option as well from author's implementaion
 
 end

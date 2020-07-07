@@ -38,6 +38,13 @@ using ImageFiltering
     @test iqi_e(img3, img4) ≈ 0.0878 atol=1e-4
     # non standard parameters, result may differ from other implementations
 
+    # Comparing with SSIM
+    iqi_f = MSSSIM(KernelFactors.gaussian(1.5, 11), (1, ))
+    @test iqi_f(img3, img4) ≈ SSIM()(img3, img4) atol=1e-4
+
+    # RGB is not the same as a 3D gray image, unlike SSIM
+    assess_msssim(img3, img4) ≠ assess_msssim(channelview(img3), channelview(img4))
+
     # Gray type tests
     type_list = generate_test_types([Float32, N0f8], [Gray])
     A = rand(128,128)
@@ -51,6 +58,11 @@ using ImageFiltering
         @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
         @test assess_msssim(a, a) ≈ 1.0
     end
+
+    # check if numbers are treated the same as gray colorants
+    a = Gray.(A)
+    b = Gray.(B)
+    @test assess_msssim(a, b) ≈ assess_msssim(A, B)
 
 
     # RGB type tests
@@ -70,4 +82,27 @@ using ImageFiltering
         @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
         @test assess_msssim(a, a) ≈ 1.0
     end
+
+    # Other Color3 type tests
+    type_list = generate_test_types([Float32], [Lab, HSV])
+    A = [RGB(0.0, 0.0, 0.0) RGB(0.0, 1.0, 0.0) RGB(0.0, 1.0, 1.0)
+        RGB(0.0, 0.0, 1.0) RGB(1.0, 0.0, 0.0) RGB(1.0, 1.0, 0.0)
+        RGB(1.0, 1.0, 1.0) RGB(1.0, 0.0, 1.0) RGB(0.0, 0.0, 0.0)]
+    B = [RGB(0.0, 0.0, 0.0) RGB(0.0, 0.0, 1.0) RGB(1.0, 1.0, 1.0)
+        RGB(0.0, 1.0, 0.0) RGB(1.0, 0.0, 0.0) RGB(1.0, 0.0, 1.0)
+        RGB(0.0, 1.0, 1.0) RGB(1.0, 1.0, 0.0) RGB(0.0, 0.0, 0.0)]
+    for T in type_list
+        a = A .|> T
+        b = B .|> T
+
+        @test_nowarn assess_ssim(A, b), assess_ssim(a, B)
+
+        @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
+        @test assess_ssim(A, A) ≈ 1.0
+
+    end
+    @test assess_ssim(A, B) ≈ assess_ssim(Lab.(A), B) atol=1e-4
+
+    type_list = generate_test_types([Float32, N0f8], [RGB, BGR])
+    test_cross_type(MSSSIM(), A, B, type_list)
 end
