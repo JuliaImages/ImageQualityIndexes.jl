@@ -98,29 +98,11 @@ function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakva
     # calculate ssim in the neighborhood of each pixel, weighted by window
     window = kernelfactors(Tuple(repeated(iqi.kernel, ndims(ref))))
 
-    μx = imfilter(x, window)   # equation (14) in [1]
-    μy = imfilter(ref, window) # equation (14) in [1]
-    μx² = μx .* μx
-    μy² = μy .* μy
-    μxy = μx .* μy
-    σx² = imfilter(x.^2, window) .- μx²     # equation (15) in [1]
-    σy² = imfilter(ref.^2, window) .- μy²   # equation (15) in [1]
-    σxy = imfilter(x .* ref, window) .- μxy # equation (16) in [1]
-
     if [α, β, γ] ≈ [1.0, 1.0, 1.0]
-        # equation (13) in [1]
-        ssim_map = @. ((2μxy + C₁)*(2σxy + C₂))/((μx²+μy²+C₁)*(σx² + σy² + C₂))
+        ssim_map = __ssim_map_fast(x, ref, window, C₁, C₂)
     else
-        σx_σy = @. sqrt(σx²*σy²)
-        l = @. (2μxy + C₁)/(μx² + μy²) # equation (6) in [1]
-        c = @. (2σx_σy + C₂)/(σx² + σy² + C₂) # equation (9) in [1]
-        s = @. (σxy + C₃)/(σx_σy + C₃) # equation (10) in [1]
-
-        # ensure that negative numbers in s are not being raised to powers less
-        # than 1, non-standard implementation
-        if γ < 1.0
-            s = max.(s, zero(eltype(s)))
-        end
+        l, c, s = __ssim_map_general(x, ref, window, C₁, C₂, C₃)
+        γ < 1.0 && (s = max.(s, zero(eltype(s))))
         ssim_map = @. l^α * c^β * s^γ # equation (12) in [1]
     end
     return ssim_map
@@ -144,4 +126,35 @@ function issymetric(kernel)
     origin = first(axes(kernel, 1))
     center = (length(kernel)-1) ÷ 2 + origin
     kernel[origin:center] ≈ kernel[end:-1:center]
+end
+
+
+function __ssim_map_fast(x, ref, window, C₁, C₂)
+    μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window)
+    # equation (13) in [1]
+    @. ((2μxy + C₁)*(2σxy + C₂))/((μx²+μy²+C₁)*(σx² + σy² + C₂))
+end
+
+function __ssim_map_general(x, ref, window, C₁, C₂, C₃)
+    μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window)
+
+    σx_σy = @. sqrt(σx²*σy²)
+    l = @. (2μxy + C₁)/(μx² + μy²) # equation (6) in [1]
+    c = @. (2σx_σy + C₂)/(σx² + σy² + C₂) # equation (9) in [1]
+    s = @. (σxy + C₃)/(σx_σy + C₃) # equation (10) in [1]
+
+    # MS-SSIM needs these, so we don't multiply them together here
+    return l, c, s
+end
+
+function _ssim_statistics(x, ref, window)
+    μx = imfilter(x, window)   # equation (14) in [1]
+    μy = imfilter(ref, window) # equation (14) in [1]
+    μx² = μx .* μx
+    μy² = μy .* μy
+    μxy = μx .* μy
+    σx² = imfilter(x.^2, window) .- μx²     # equation (15) in [1]
+    σy² = imfilter(ref.^2, window) .- μy²   # equation (15) in [1]
+    σxy = imfilter(x .* ref, window) .- μxy # equation (16) in [1]
+    return μx², μxy, μy², σx², σxy, σy²
 end
