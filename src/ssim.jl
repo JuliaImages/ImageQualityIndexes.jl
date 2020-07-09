@@ -15,13 +15,6 @@ locally with neighborhoods weighted by `kernel`, returning a ssim map;
 `ssim` is actaully `mean(ssim_map)`.
 By default `kernel = KernelFactors.gaussian(1.5, 11)`.
 
-!!! info
-
-    SSIM is defined only for gray images. RGB images are treated as 3d Gray
-    images. General `Color3` images are converted to RGB images first, you could
-    manually expand them using `channelview` if you don't want them converted to
-    RGB first.
-
 !!! tip
 
     The default parameters comes from [1]. For benchmark usage, it is recommended to not
@@ -36,8 +29,14 @@ function. For example:
 ```julia
 iqi = SSIM(KernelFactors.gaussian(2.5, 17), (1.0, 1.0, 2.0))
 assess(iqi, img, ref)
-iqi(img, ref)
+iqi(img, ref) # both usages are equivalent
 ```
+
+!!! info
+
+    SSIM is defined only for gray images. How `RGB` and other `Color3` images are handled may vary
+    in different implementations. For `RGB` images, channels are handled seperately when calculating
+    𝐿, 𝐶, and 𝑆. Generic `Color3` images are converted to `RGB` first before calculation.
 
 # Reference
 
@@ -82,8 +81,12 @@ const SSIM_K = (0.01, 0.03)
 # SSIM is defined only for gray images,
 # RGB images are treated as 3d gray images,
 # other Color3 images are converted to RGB first.
-function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakval = 1.0, K = SSIM_K)
-    if size(x) ≠ size(ref)
+function _ssim_map(iqi::SSIM,
+                   x::Union{GenericGrayImage, AbstractArray{<:AbstractRGB}},
+                   ref::Union{GenericGrayImage, AbstractArray{<:AbstractRGB}},
+                   peakval = 1.0,
+                   K = SSIM_K)
+    if axes(x) ≠ axes(ref)
         err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
     end
@@ -95,30 +98,25 @@ function _ssim_map(iqi::SSIM, x::GenericGrayImage, ref::GenericGrayImage, peakva
     x = of_eltype(T, x)
     ref = of_eltype(T, ref)
 
-    # calculate ssim in the neighborhood of each pixel, weighted by window
-    window = kernelfactors(Tuple(repeated(iqi.kernel, ndims(ref))))
-
     if [α, β, γ] ≈ [1.0, 1.0, 1.0]
-        ssim_map = __ssim_map_fast(x, ref, window, C₁, C₂)
+        ssim_map = __ssim_map_fast(x, ref, iqi.kernel, C₁, C₂)
     else
-        l, c, s = __ssim_map_general(x, ref, window, C₁, C₂, C₃)
+        l, c, s = __ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃)
+        # ensure that negative numbers in s are not being raised to powers less than 1
+        # this is a non-standard implementation and it could vary from implementaion to implementaion
         γ < 1.0 && (s = max.(s, zero(eltype(s))))
         ssim_map = @. l^α * c^β * s^γ # equation (12) in [1]
     end
     return ssim_map
 end
 
-_ssim_map(iqi::SSIM,
-          x::AbstractArray{<:AbstractRGB},
-          ref::AbstractArray{<:AbstractRGB},
-          peakval = 1.0, K = SSIM_K) =
-    _ssim_map(iqi, channelview(x), channelview(ref), peakval, K)
-
-_ssim_map(iqi::SSIM,
+function _ssim_map(iqi::SSIM,
           x::AbstractArray{<:Color3},
           ref::AbstractArray{<:Color3},
-          peakval = 1.0, K = SSIM_K) =
-    _ssim_map(iqi, of_eltype(RGB, x), of_eltype(RGB, ref), peakval, K)
+          peakval = 1.0, K = SSIM_K)
+    C = ccolor(RGB, floattype(eltype(x)))
+    _ssim_map(iqi, of_eltype(C, x), of_eltype(C, ref), peakval, K)
+end
 
 
 # helpers
@@ -129,14 +127,15 @@ function issymetric(kernel)
 end
 
 
-function __ssim_map_fast(x, ref, window, C₁, C₂)
-    μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window)
+function __ssim_map_fast(x, ref, window, C₁, C₂; crop = false)
+    μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window; crop=crop)
+    # this is a special case when [α, β, γ] ≈ [1.0, 1.0, 1.0]
     # equation (13) in [1]
-    @. ((2μxy + C₁)*(2σxy + C₂))/((μx²+μy²+C₁)*(σx² + σy² + C₂))
+    return @. ((2μxy + C₁)*(2σxy + C₂))/((μx²+μy²+C₁)*(σx² + σy² + C₂))
 end
 
-function __ssim_map_general(x, ref, window, C₁, C₂, C₃)
-    μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window)
+function __ssim_map_general(x, ref, window, C₁, C₂, C₃; crop = false)
+    μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window; crop = crop)
 
     σx_σy = @. sqrt(σx²*σy²)
     l = @. (2μxy + C₁)/(μx² + μy²) # equation (6) in [1]
@@ -147,14 +146,31 @@ function __ssim_map_general(x, ref, window, C₁, C₂, C₃)
     return l, c, s
 end
 
-function _ssim_statistics(x, ref, window)
-    μx = imfilter(x, window)   # equation (14) in [1]
-    μy = imfilter(ref, window) # equation (14) in [1]
-    μx² = μx .* μx
-    μy² = μy .* μy
-    μxy = μx .* μy
-    σx² = imfilter(x.^2, window) .- μx²     # equation (15) in [1]
-    σy² = imfilter(ref.^2, window) .- μy²   # equation (15) in [1]
-    σxy = imfilter(x .* ref, window) .- μxy # equation (16) in [1]
-    return μx², μxy, μy², σx², σxy, σy²
+function _ssim_statistics(x::GenericImage, ref::GenericImage, window; crop)
+    # For RGB and other Color3 images, we don't slide the window at the color channel.
+    # In other words, these characters will be calculated channelwisely
+    window = kernelfactors(Tuple(repeated(window, ndims(ref))))
+
+    region = map(window, axes(x)) do w, a
+        o = length(w) ÷ 2
+        first(a)+o:last(a)-o
+    end
+    R = crop ? CartesianIndices(region) : CartesianIndices(x)
+
+    # don't slide the window in the channel dimension
+    μx = view(imfilter(x,   window, "symmetric"), R) # equation (14) in [1]
+    μy = view(imfilter(ref, window, "symmetric"), R) # equation (14) in [1]
+    μx² = _mul.(μx, μx)
+    μy² = _mul.(μy, μy)
+    μxy = _mul.(μx, μy)
+    σx² = view(imfilter(_mul.(x,   x  ), window, "symmetric"), R) .- μx² # equation (15) in [1]
+    σy² = view(imfilter(_mul.(ref, ref), window, "symmetric"), R) .- μy² # equation (15) in [1]
+    σxy = view(imfilter(_mul.(x,   ref), window, "symmetric"), R) .- μxy # equation (16) in [1]
+
+    # after that, channel dimension can be treated generically so we expand them here
+    return channelview.((μx², μxy, μy², σx², σxy, σy²))
 end
+
+# _ssim_statistics does not expected to work with other Color3 types
+@inline _mul(x::Number, y::Number) = x * y
+@inline _mul(x::C, y::C) where C <: Union{AbstractGray, AbstractRGB} = mapc(*, x, y)

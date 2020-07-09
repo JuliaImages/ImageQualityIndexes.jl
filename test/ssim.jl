@@ -16,8 +16,13 @@ using ImageFiltering
     img1 = testimage("cameraman")
     img2 = testimage("lena_gray_512")
     @test assess_ssim(img1, img2) ≈ 0.3595 atol=1e-4 # MATLAB built-in ssim result
-    iqi_δ = SSIM(KernelFactors.gaussian(1.5, 11), (1.0+1e-5, 1.0, 1.0))
-    @test assess(iqi_δ, img1, img2) ≈ assess(SSIM(), img1, img2) atol = 1e-4
+
+    # this calls the general implementation
+    iqi_δ1 = SSIM(KernelFactors.gaussian(1.5, 11), (1.0+1e-5, 1.0, 1.0))
+    @test assess(iqi_δ1, img1, img2) ≈ assess(SSIM(), img1, img2) atol = 1e-4
+    # this calls the general implementation with max.(s, 0)
+    iqi_δ2 = SSIM(KernelFactors.gaussian(1.5, 11), (1.0, 1.0, 1.0-1e-5))
+    @test assess(iqi_δ2, img1, img2) ≈ assess(SSIM(), img1, img2) atol = 1e-2
 
     # non-standard powers
     iqi_γ = SSIM(KernelFactors.gaussian(1.5, 11), (0.5, 0.5, 0.5))
@@ -47,7 +52,8 @@ using ImageFiltering
     # RGB image
     img1 = testimage("mandril_color")
     img2 = testimage("lena_color_512")
-    @test assess_ssim(img1, img2) ≈ 0.0664 atol=1e-4 # MATLAB built-in assess_ssim result
+    # this differs from MATLAB built-in result as our implementation don't slide the window in the channel dimension
+    @test assess_ssim(img1, img2) ≈ 0.11069226443828077 atol=1e-4
 
     type_list = generate_test_types([Float32, N0f8], [RGB])
     A = [RGB(0.0, 0.0, 0.0) RGB(0.0, 1.0, 0.0) RGB(0.0, 1.0, 1.0)
@@ -63,12 +69,11 @@ using ImageFiltering
         b = B .|> T
 
         @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-        @test assess_ssim(a, b) == assess_ssim(channelview(a), channelview(b))
+        @test assess_ssim(a, b) ≠ assess_ssim(channelview(a), channelview(b))
         @test assess_ssim(a, a) ≈ 1.0
 
         # RGB is treated as 3d gray image
         test_numeric(iqi, a, b, T)
-        test_numeric(iqi, channelview(a), channelview(b), T; filename="references/SSIM_2d_RGB")
     end
     type_list = generate_test_types([Float32, N0f8], [RGB, BGR])
     test_cross_type(iqi, A, B, type_list)
