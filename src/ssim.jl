@@ -1,7 +1,7 @@
 """
-    SSIM([kernel], [(α, β, γ)]) <: FullReferenceIQI
+    SSIM([kernel], [(α, β, γ)]; crop=false) <: FullReferenceIQI
     assess(iqi::SSIM, img, ref)
-    assess_ssim(img, ref)
+    assess_ssim(img, ref; crop=false)
 
 Structural similarity (SSIM) index is an image quality assessment method based
 on degradation of structural information.
@@ -19,6 +19,8 @@ By default `kernel = KernelFactors.gaussian(1.5, 11)`.
 
     The default parameters comes from [1]. For benchmark usage, it is recommended to not
     change the parameters, because most other SSIM implementations follows the same settings.
+    Keyword `crop` controls whether the boundary of ssim map should be dropped; you need
+    to set it `true` to reproduce the result in [1].
 
 # Example
 
@@ -44,32 +46,34 @@ iqi(img, ref) # both usages are equivalent
 
 [2] Wang, Z., Bovik, A. C., Sheikh, H. R., & Simoncelli, E. P. (2003). The SSIM Index for Image Quality Assessment. Retrived May 30, 2019, from http://www.cns.nyu.edu/~lcv/ssim/
 """
-struct SSIM <: FullReferenceIQI
-    kernel::AbstractArray{<:Real}
-    W::NTuple{3}
-    function SSIM(kernel, W)
+struct SSIM{A<:AbstractVector} <: FullReferenceIQI
+    kernel::A
+    W::NTuple{3, Float64}
+    crop::Bool
+    function SSIM(kernel::AbstractVector=SSIM_KERNEL, W::NTuple=SSIM_W; crop=false)
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "SSIM kernel is assumed to be symmetric"
         all(W .>= 0) || throw(ArgumentError("(α, β, γ) should be non-negative, instead it's $(W)"))
-        new(kernel, W)
+        kernel = centered(kernel)
+        new{typeof(kernel)}(kernel, W, crop)
     end
 end
 
 # default values from [1]
 const SSIM_KERNEL = KernelFactors.gaussian(1.5, 11) # kernel
 const SSIM_W = (1.0, 1.0, 1.0) # (α, β, γ)
-SSIM(kernel=SSIM_KERNEL) = SSIM(kernel, SSIM_W)
+
+Base.:(==)(ia::SSIM, ib::SSIM) = ia.kernel == ib.kernel && ia.W == ib.W && ia.crop == ib.crop
 
 # api
-# By default we don't crop the padding boundary to meet the ssim result from
+# By default we don't crop the padding boundary to match the ssim result from
 # MATLAB Image Processing Toolbox, which is used more broadly than the original
 # implementaion [2] (written in MATLAB as well).
-# TODO: add keyword argument "crop=false" for compatibility
 # -- Johnny Chen <johnnychen94@hotmail.com>
 (iqi::SSIM)(x, ref) = mean(_ssim_map(iqi, x, ref))
 
 @doc (@doc SSIM)
-assess_ssim(x, ref) = SSIM()(x, ref)
+assess_ssim(x, ref; crop=false) = SSIM(;crop=crop)(x, ref)
 
 # Parameters `(K₁, K₂)` are used to avoid instability when denominator is very
 # close to zero. Different from origianl implementation [2], we don't make it
@@ -99,9 +103,9 @@ function _ssim_map(iqi::SSIM,
     ref = of_eltype(T, ref)
 
     if [α, β, γ] ≈ [1.0, 1.0, 1.0]
-        ssim_map = __ssim_map_fast(x, ref, iqi.kernel, C₁, C₂)
+        ssim_map = __ssim_map_fast(x, ref, iqi.kernel, C₁, C₂; crop=iqi.crop)
     else
-        l, c, s = __ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃)
+        l, c, s = __ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃; crop=iqi.crop)
         # ensure that negative numbers in s are not being raised to powers less than 1
         # this is a non-standard implementation and it could vary from implementaion to implementaion
         γ < 1.0 && (s = max.(s, zero(eltype(s))))
@@ -127,14 +131,14 @@ function issymetric(kernel)
 end
 
 
-function __ssim_map_fast(x, ref, window, C₁, C₂; crop = false)
+function __ssim_map_fast(x, ref, window, C₁, C₂; crop)
     μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window; crop=crop)
     # this is a special case when [α, β, γ] ≈ [1.0, 1.0, 1.0]
     # equation (13) in [1]
     return @. ((2μxy + C₁)*(2σxy + C₂))/((μx²+μy²+C₁)*(σx² + σy² + C₂))
 end
 
-function __ssim_map_general(x, ref, window, C₁, C₂, C₃; crop = false)
+function __ssim_map_general(x, ref, window, C₁, C₂, C₃; crop)
     μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window; crop = crop)
 
     σx_σy = @. sqrt(σx²*σy²)
@@ -153,7 +157,8 @@ function _ssim_statistics(x::GenericImage, ref::GenericImage, window; crop)
 
     region = map(window, axes(x)) do w, a
         o = length(w) ÷ 2
-        first(a)+o:last(a)-o
+        # Even if crop=true, it crops only when image is larger than window
+        length(a) > length(w) ? (first(a)+o:last(a)-o) : a
     end
     R = crop ? CartesianIndices(region) : CartesianIndices(x)
 
