@@ -63,6 +63,11 @@ using ImageFiltering
     @test assess_ssim(img1, img2; crop=false) ≈ 0.11069226443828077 atol=1e-4 # MATLAB built-in: 0.0664
     @test assess_ssim(img1, img2; crop=true) ≈ 0.10967952100784095 atol=1e-4 # the original implementation: 0.1047
 
+    # gray images are promoted to RGB images before calculation
+    img3 = testimage("lena_gray_512")
+    @test assess_ssim(img2, img3) == assess_ssim(img2, RGB.(img3))
+    @test assess_ssim(img2, img3) ≠ assess_ssim(Gray.(img2), img3)
+
     type_list = generate_test_types([Float32, N0f8], [RGB])
     A = [RGB(0.0, 0.0, 0.0) RGB(0.0, 1.0, 0.0) RGB(0.0, 1.0, 1.0)
         RGB(0.0, 0.0, 1.0) RGB(1.0, 0.0, 0.0) RGB(1.0, 1.0, 0.0)
