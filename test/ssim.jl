@@ -31,6 +31,10 @@ using ImageFiltering
     @test iqi_γ(img1, img2) ≈ 0.5261 atol=1e-4
     # non standard parameters, result may differ from other implementations
 
+    # images should have the same size, but their axes can differs
+    @test assess_ssim(img1, OffsetArray(img2, -2, -2)) == assess_ssim(img1, img2)
+    @test_throws ArgumentError assess_ssim(img1, restrict(img2))
+
     # Gray image
     type_list = generate_test_types([Bool, Float32, N0f8], [Gray])
     A = [1.0 1.0 1.0; 1.0 1.0 1.0; 0.0 0.0 0.0]

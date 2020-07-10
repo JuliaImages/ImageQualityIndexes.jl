@@ -90,9 +90,13 @@ function _ssim_map(iqi::SSIM,
                    ref::Union{GenericGrayImage, AbstractArray{<:AbstractRGB}},
                    peakval = 1.0,
                    K = SSIM_K)
-    if axes(x) ≠ axes(ref)
+    if size(x) ≠ size(ref)
         err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
+    end
+    if axes(x) ≠ axes(ref)
+        x = OffsetArrays.no_offset_view(x)
+        ref = OffsetArrays.no_offset_view(ref)
     end
     α, β, γ = iqi.W
     C₁, C₂ = @. (peakval * K)^2
