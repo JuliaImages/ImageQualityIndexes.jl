@@ -14,19 +14,22 @@ using ImageFiltering
         (0.2363, 0.2363, 0.2363),
         (0.1333, 0.1333, 0.1333),
     ))
-    @test (iqi_a.kernel == iqi_b.kernel == iqi_c.kernel == iqi_d.kernel) &&
-          (iqi_a.W == iqi_b.W == iqi_c.W == iqi_d.W)
+    @test iqi_a == iqi_b == iqi_c == iqi_d
 
     # Gray test images
-    img1 = testimage("cameraman")
+    img1 = testimage("fabio_gray_512")
     img2 = testimage("lena_gray_512")
-    @test assess_msssim(img1, img2) ≈ 0.0711 atol=1e-4
+    # Tensorflow, pytorch_msssim and MATLAB original implementation: 0.1072
+    # We have strong reason to suspect that MSSSIM in MATLAB R2020a is incorrect
+    # https://github.com/JuliaImages/ImageQualityIndexes.jl/pull/19#issuecomment-655208537
+    @test assess_msssim(img1, img2) ≈ 0.11107 atol=1e-4
     @test assess(MSSSIM(), img1, img2) ≈ MSSSIM()(img1, img2)
 
     # RGB test images
+    # MS-SSIM in MATLAB R2020a and its original implementation only support Gray images
     img3 = testimage("mandril_color")
     img4 = testimage("lena_color_512")
-    @test assess_msssim(img3, img4) ≈ 0.0219 atol=1e-4
+    @test assess_msssim(img3, img4) ≈ 0.08514 atol=1e-4 # pytorch_msssim: 0.0786
     @test assess(MSSSIM(), img3, img4) ≈ MSSSIM()(img3, img4)
 
     # Varying αᵢ, βᵢ, γᵢ
@@ -35,15 +38,16 @@ using ImageFiltering
         (0.3001, 0.0448, 0.2856),
         (0.2856, 0.3001, 0.0448),
     ))
-    @test iqi_e(img3, img4) ≈ 0.0878 atol=1e-4
+    @test iqi_e(img3, img4) ≈ 0.27773 atol=1e-4
     # non standard parameters, result may differ from other implementations
 
     # Comparing with SSIM
     iqi_f = MSSSIM(KernelFactors.gaussian(1.5, 11), (1, ))
-    @test iqi_f(img3, img4) ≈ SSIM()(img3, img4) atol=1e-4
+    @test_broken iqi_f(img3, img4) ≈ SSIM()(img3, img4) atol=1e-4
 
-    # RGB is not the same as a 3D gray image, unlike SSIM
-    assess_msssim(img3, img4) ≠ assess_msssim(channelview(img3), channelview(img4))
+    # RGB - Gray
+    @test assess_msssim(img3, Gray.(img4)) == assess_msssim(img3, RGB.(Gray.(img4)))
+    @test assess_msssim(img3, img4) ≠ assess_msssim(channelview(img3), channelview(img4))
 
     # Gray type tests
     type_list = generate_test_types([Float32, N0f8], [Gray])
@@ -56,7 +60,7 @@ using ImageFiltering
         b = B .|> T
 
         @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
-        @test assess_msssim(a, a) ≈ 1.0
+        @test assess_msssim(a, a) ≈ 1.0 atol=1e-4
     end
 
     # check if numbers are treated the same as gray colorants
@@ -80,7 +84,7 @@ using ImageFiltering
         b = B .|> T
 
         @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
-        @test assess_msssim(a, a) ≈ 1.0
+        @test assess_msssim(a, a) ≈ 1.0 atol=1e-4
     end
 
     # Other Color3 type tests
@@ -98,7 +102,7 @@ using ImageFiltering
         @test_nowarn assess_ssim(A, b), assess_ssim(a, B)
 
         @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-        @test assess_ssim(A, A) ≈ 1.0
+        @test assess_ssim(A, A) ≈ 1.0 atol=1e-4
 
     end
     @test assess_ssim(A, B) ≈ assess_ssim(Lab.(A), B) atol=1e-4
