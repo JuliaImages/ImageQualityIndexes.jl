@@ -57,6 +57,10 @@ using ImageFiltering
     iqi_f = MSSSIM(KernelFactors.gaussian(1.5, 11), (1, ))
     @test iqi_f(img3, img4) ≈ SSIM()(img3, img4) atol=1e-4
 
+    # images should have the same size, but their axes can differs
+    @test assess_msssim(img1, OffsetArray(img2, -2, -2)) == assess_msssim(img1, img2)
+    @test_throws ArgumentError assess_msssim(img1, restrict(img2))
+
     # RGB - Gray
     @test assess_msssim(img3, Gray.(img4)) == assess_msssim(img3, RGB.(Gray.(img4)))
     @test assess_msssim(img3, img4) ≠ assess_msssim(channelview(img3), channelview(img4))

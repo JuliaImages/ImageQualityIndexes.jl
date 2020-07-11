@@ -77,6 +77,10 @@ function _msssim(iqi::MSSSIM,
         err = ArgumentError("images should be the same size, instead they're $(size(x))-$(size(ref))")
         throw(err)
     end
+    if axes(x) ≠ axes(ref)
+        x = OffsetArrays.no_offset_view(x)
+        ref = OffsetArrays.no_offset_view(ref)
+    end
     C₁, C₂ = @. (peakval * K)^2
     C₃ = C₂/2
 
