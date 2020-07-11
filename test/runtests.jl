@@ -1,5 +1,6 @@
 using ImageQualityIndexes
 using Test, ReferenceTests, TestImages
+using Suppressor
 using Statistics
 using OffsetArrays
 using ImageTransformations

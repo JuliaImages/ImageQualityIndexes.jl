@@ -5,7 +5,7 @@ using ImageCore, ColorVectorSpace
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
 using ImageDistances, ImageFiltering
 using Statistics: mean, std
-using Base.Iterators: repeated
+using Base.Iterators: repeated, flatten
 
 include("generic.jl")
 include("psnr.jl")
