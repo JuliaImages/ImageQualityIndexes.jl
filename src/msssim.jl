@@ -1,7 +1,7 @@
 """
-    MSSSIM([kernel], [W]; scale = length(W)) <: FullReferenceIQI
+    MSSSIM([kernel], [W]; num_scales = length(W)) <: FullReferenceIQI
     assess(iqi::MSSSIM, img, ref)
-    assess_msssim(img, ref; scale = 5)
+    assess_msssim(img, ref; num_scales = 5)
 
 Computes the multi-scale structural similarity (MS-SSIM) between two images.
 
@@ -34,26 +34,26 @@ struct MSSSIM{A, N} <: FullReferenceIQI
     kernel::A
     W::NTuple{N, NTuple{3, Float64}}
 
-    function MSSSIM(kernel=SSIM_KERNEL, W=MSSSIM_W; scale::Integer=length(W))
+    function MSSSIM(kernel=SSIM_KERNEL, W=MSSSIM_W; num_scales::Integer=length(W))
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "MSSSIM kernel is assumed to be symmetric"
         all(length.(W) .== 3) || throw(ArgumentError("(α, β, γ) required for all scales, instead it's $(W)"))
-        (scale ∈ 1:length(W)) || throw(ArgumentError("`scale` should be positive integer between [1, $(length(W))]"))
+        (num_scales ∈ 1:length(W)) || throw(ArgumentError("`num_scales` $(num_scales) should be positive integer between [1, $(length(W))]"))
         all(x-> x>=0, flatten(W)) || throw(ArgumentError("α, β, γ should be non-negative for all scales, instead it's $(W)"))
         sum(flatten(W)) == 0 && throw(ArgumentError("MS-SSIM must have at least one weight > 0"))
 
         kernel = centered(kernel)
-        if scale ≠ length(W)
-            W ≠ MSSSIM_W && @warn "truncate MS-SSIM weights to scale $scale"
+        if num_scales ≠ length(W)
+            W ≠ MSSSIM_W && @warn "truncate MS-SSIM weights to scale $num_scales"
         end
-        W = W[1:scale]
-        sw = reduce((w1, w2) -> w1.+w2, W[1:scale])
+        W = W[1:num_scales]
+        sw = reduce((w1, w2) -> w1.+w2, W[1:num_scales])
         if !all(x -> x≈1.0, sw)
-            W ≠ MSSSIM_W[1:scale] && @warn "normalize MS-SSIM weights so that (∑α, ∑β, ∑γ) == (1.0, 1.0, 1.0)"
+            W ≠ MSSSIM_W[1:num_scales] && @warn "normalize MS-SSIM weights so that (∑α, ∑β, ∑γ) == (1.0, 1.0, 1.0)"
             W = map(w->w./sw, W)
         end
         
-        new{typeof(kernel), Int(scale)}(kernel, W)
+        new{typeof(kernel), Int(num_scales)}(kernel, W)
     end
 end
 # Weights for α, β, γ in [1]
@@ -65,14 +65,16 @@ const MSSSIM_W = (
     (0.1333, 0.1333, 0.1333), # α₅, β₅, γ₅
 )
 # shorthand for αᵢ=βᵢ=γᵢ for all scales i
-MSSSIM(kernel, W::NTuple{N, <:Real}; scale=length(W)) where N = MSSSIM(kernel, map(x->(x, x, x), W); scale=scale)
+function MSSSIM(kernel, W::NTuple{N, <:Real}; num_scales=length(W)) where N
+    MSSSIM(kernel, map(x->(x, x, x), W); num_scales=num_scales)
+end
 
 Base.:(==)(ia::MSSSIM, ib::MSSSIM) = ia.kernel == ib.kernel && ia.W == ib.W
 
 
 # SSIM does not allow for user specifying peakval and K, so we don't allow it here either
 (iqi::MSSSIM)(x, ref) = _msssim(iqi, x, ref)
-assess_msssim(x, ref; scale=5) = MSSSIM(scale=scale)(x, ref)
+assess_msssim(x, ref; num_scales=5) = MSSSIM(num_scales=num_scales)(x, ref)
 
 # Implementation details
 function _msssim(iqi::MSSSIM,

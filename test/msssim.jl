@@ -14,7 +14,7 @@ using ImageFiltering
         (0.2363, 0.2363, 0.2363),
         (0.1333, 0.1333, 0.1333),
     ))
-    iqi_e = MSSSIM(; scale=5)
+    iqi_e = MSSSIM(; num_scales=5)
     iqi_f = @suppress_err MSSSIM(KernelFactors.gaussian(1.5, 11), 2 .* (0.0448, 0.2856, 0.3001, 0.2363, 0.1333))
     @test iqi_a == iqi_b == iqi_c == iqi_d == iqi_e == iqi_f
 
@@ -23,7 +23,7 @@ using ImageFiltering
     end
     @test output == ""
     output = @capture_err begin
-        MSSSIM(KernelFactors.gaussian(1.5, 11), (0.1, 0.3, 0.6); scale=1)
+        MSSSIM(KernelFactors.gaussian(1.5, 11), (0.1, 0.3, 0.6); num_scales=1)
     end
     @test occursin("truncate MS-SSIM weights to scale", output)
     @test occursin("normalize MS-SSIM weights so that (∑α, ∑β, ∑γ) == (1.0, 1.0, 1.0)", output)
@@ -77,7 +77,7 @@ using ImageFiltering
 
         @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
         @test assess_msssim(a, a) ≈ 1.0 atol=1e-4
-        @test assess_msssim(a, b; scale=1) == assess(MSSSIM(scale=1), a, b) == MSSSIM(scale=1)(a, b)
+        @test assess_msssim(a, b; num_scales=1) == assess(MSSSIM(num_scales=1), a, b) == MSSSIM(num_scales=1)(a, b)
     end
 
     # check if numbers are treated the same as gray colorants
@@ -102,7 +102,7 @@ using ImageFiltering
 
         @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
         @test assess_msssim(a, a) ≈ 1.0 atol=1e-4
-        @test assess_msssim(a, b; scale=1) == assess(MSSSIM(scale=1), a, b) == MSSSIM(scale=1)(a, b)
+        @test assess_msssim(a, b; num_scales=1) == assess(MSSSIM(num_scales=1), a, b) == MSSSIM(num_scales=1)(a, b)
     end
 
     # Other Color3 type tests
@@ -117,14 +117,14 @@ using ImageFiltering
         a = A .|> T
         b = B .|> T
 
-        @test_nowarn assess_ssim(A, b), assess_ssim(a, B)
+        @test_nowarn assess_msssim(A, b), assess_msssim(a, B)
 
-        @test assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
-        @test assess_ssim(A, A) ≈ 1.0 atol=1e-4
-        @test assess_msssim(a, b; scale=1) == assess(MSSSIM(scale=1), a, b) == MSSSIM(scale=1)(a, b)
+        @test assess_msssim(a, b) == assess(MSSSIM(), a, b) == MSSSIM()(a, b)
+        @test assess_msssim(a, a) ≈ 1.0 atol=1e-4
+        @test assess_msssim(a, b; num_scales=1) == assess(MSSSIM(num_scales=1), a, b) == MSSSIM(num_scales=1)(a, b)
 
     end
-    @test assess_ssim(A, B) ≈ assess_ssim(Lab.(A), B) atol=1e-4
+    @test assess_msssim(A, B) ≈ assess_msssim(Lab.(A), B) atol=1e-4
 
     type_list = generate_test_types([Float32, N0f8], [RGB, BGR])
     test_cross_type(MSSSIM(), A, B, type_list)
