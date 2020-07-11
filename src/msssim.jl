@@ -40,6 +40,7 @@ struct MSSSIM{A, N} <: FullReferenceIQI
         all(length.(W) .== 3) || throw(ArgumentError("(α, β, γ) required for all scales, instead it's $(W)"))
         (scale ∈ 1:length(W)) || throw(ArgumentError("`scale` should be positive integer between [1, $(length(W))]"))
         all(x-> x>=0, flatten(W)) || throw(ArgumentError("α, β, γ should be non-negative for all scales, instead it's $(W)"))
+        sum(flatten(W)) == 0 && throw(ArgumentError("MS-SSIM must have at least one weight > 0"))
 
         kernel = centered(kernel)
         if scale ≠ length(W)
@@ -56,7 +57,13 @@ struct MSSSIM{A, N} <: FullReferenceIQI
     end
 end
 # Weights for α, β, γ in [1]
-const MSSSIM_W = map(x->(x, x, x), (0.0448, 0.2856, 0.3001, 0.2363, 0.1333)) # α, β, γ for scales 1 through 5
+const MSSSIM_W = (
+    (0.0448, 0.0448, 0.0448), # α₁, β₁, γ₁
+    (0.2856, 0.2856, 0.2856), # α₂, β₂, γ₂
+    (0.3001, 0.3001, 0.3001), # α₃, β₃, γ₃
+    (0.2363, 0.2363, 0.2363), # α₄, β₄, γ₄
+    (0.1333, 0.1333, 0.1333), # α₅, β₅, γ₅
+)
 # shorthand for αᵢ=βᵢ=γᵢ for all scales i
 MSSSIM(kernel, W::NTuple{N, <:Real}; scale=length(W)) where N = MSSSIM(kernel, map(x->(x, x, x), W); scale=scale)
 
@@ -84,19 +91,13 @@ function _msssim(iqi::MSSSIM,
     C₁, C₂ = @. (peakval * K)^2
     C₃ = C₂/2
 
-    scales = length(iqi.W) # number of scales
+    num_scales = length(iqi.W)
     T = promote_type(float(eltype(ref)), float(eltype(x)))
     x = of_eltype(T, x)
     ref = of_eltype(T, ref)
 
-    # check if no. of scales are >= 1
-    scales < 1 && throw(ArgumentError("MS-SSIM needs at least one scale"))
-
-    # check if weights are valid - as per authors implementaion
-    sum(sum.(iqi.W)) == 0 && throw(ArgumentError("MS-SSIM must have at least one weight > 0"))
-
     mean_lcs = NTuple{3, Float64}[]
-    for i in 1:scales
+    for i in 1:num_scales
         lcs = __ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃; crop=true)
         w = iqi.W[i]
         if w[2] ≈ w[3]
@@ -110,12 +111,12 @@ function _msssim(iqi::MSSSIM,
         push!(mean_lcs, lcs)
 
         # downsampling
-        i == scales && break
+        i == num_scales && break
         x = _average_pooling(x)
         ref = _average_pooling(ref)
     end
 
-    # weighted them up, but only l of the last scales is used according to equation (7) in [1]
+    # weighted them up, but only l of the last scale is used according to equation (7) in [1]
     mean_lcs = map(mean_lcs, iqi.W) do lcs, w
         # similar to SSIM, here we ensure that negative numbers in s are not being raised to powers
         # less than 1
