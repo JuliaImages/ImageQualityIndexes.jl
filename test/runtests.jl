@@ -1,6 +1,8 @@
 using ImageQualityIndexes
 using Test, ReferenceTests, TestImages
 using Statistics
+using OffsetArrays
+using ImageTransformations
 
 include("testutils.jl")
 

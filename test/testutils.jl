@@ -36,7 +36,7 @@ function test_numeric(dist, a, b, T; filename=nothing)
         end
     end
     # @test_reference "$(filename)_$(eltype(a))_$(eltype(b)).txt" assess(dist, a, b)
-    @test_reference "$(filename).txt" Float64(assess(dist, a, b))
+    @test_reference "$(filename).txt" string(Float64(assess(dist, a, b)))
 end
 
 """
