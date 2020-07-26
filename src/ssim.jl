@@ -145,7 +145,8 @@ end
 function __ssim_map_general(x, ref, window, C₁, C₂, C₃; crop)
     μx², μxy, μy², σx², σxy, σy² = _ssim_statistics(x, ref, window; crop = crop)
 
-    σx_σy = @. sqrt(σx²*σy²)
+    T = eltype(σx²)
+    σx_σy = @. sqrt( max(σx²*σy², zero(T) ))
     l = @. (2μxy + C₁)/(μx² + μy²) # equation (6) in [1]
     c = @. (2σx_σy + C₂)/(σx² + σy² + C₂) # equation (9) in [1]
     s = @. (σxy + C₃)/(σx_σy + C₃) # equation (10) in [1]

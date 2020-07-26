@@ -108,7 +108,7 @@ using ImageFiltering
 
         @test assess_ssim(a, b; crop = false) == assess_ssim(a, b) == assess(SSIM(), a, b) == SSIM()(a, b)
         @test assess_ssim(a, b; crop = true) == assess(SSIM(crop = true), a, b) == SSIM(crop = true)(a, b)
-        @test assess_ssim(A, A) ≈ 1.0
+        @test assess_ssim(a, a) ≈ 1.0
 
         # conversion to RGB first differs from no conversion
         @test assess_ssim(a, b) ≠ assess_ssim(channelview(a), channelview(b))
