@@ -100,16 +100,9 @@ function _msssim(iqi::MSSSIM,
 
     mean_lcs = NTuple{3, Float64}[]
     for i in 1:num_scales
-        lcs = __ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃; crop=true)
-        w = iqi.W[i]
-        if w[2] ≈ w[3]
-            # only to mimic the original implementation and compute mean(c .* s)
-            # in this case, MS-SSIM with scale 1 is equivalent to SSIM
-            lcs = (mean(lcs[1]), 1, mean(lcs[2] .* lcs[3]))
-        else
-            # here we compute mean(c) * mean(s)
-            lcs = mean.(lcs)
-        end
+        # instead of the original implementation that calculates mean(c .* s) 
+        # here we use a more general version mean(c) * mean(s)
+        lcs = mean.(__ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃; crop=true))
         push!(mean_lcs, lcs)
 
         # downsampling

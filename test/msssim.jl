@@ -34,14 +34,14 @@ using ImageFiltering
     # Tensorflow, pytorch_msssim and MATLAB original implementation: 0.1072
     # We have strong reason to suspect that MSSSIM in MATLAB R2020a is incorrect
     # https://github.com/JuliaImages/ImageQualityIndexes.jl/pull/19#issuecomment-655208537
-    @test assess_msssim(img1, img2) ≈ 0.11223 atol=1e-4
+    @test assess_msssim(img1, img2) ≈ 0.11109 atol=1e-4
     @test assess(MSSSIM(), img1, img2) ≈ MSSSIM()(img1, img2)
 
     # RGB test images
     # MS-SSIM in MATLAB R2020a and its original implementation only support Gray images
     img3 = testimage("mandril_color")
     img4 = testimage("lena_color_512")
-    @test assess_msssim(img3, img4) ≈ 0.07956 atol=1e-4 # pytorch_msssim: 0.0786
+    @test assess_msssim(img3, img4) ≈ 0.08516 atol=1e-4 # pytorch_msssim: 0.0786
     @test assess(MSSSIM(), img3, img4) ≈ MSSSIM()(img3, img4)
 
     # Varying αᵢ, βᵢ, γᵢ
@@ -55,7 +55,7 @@ using ImageFiltering
 
     # Comparing with SSIM
     iqi_f = MSSSIM(KernelFactors.gaussian(1.5, 11), (1, ))
-    @test iqi_f(img3, img4) ≈ SSIM()(img3, img4) atol=1e-4
+    @test iqi_f(img3, img4) ≈ SSIM()(img3, img4) atol=1e-3
 
     # images should have the same size, but their axes can differs
     @test assess_msssim(img1, OffsetArray(img2, -2, -2)) == assess_msssim(img1, img2)
