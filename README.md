@@ -12,6 +12,7 @@ ImageQualityIndexes provides the basic image quality assessment methods. Check t
 
 * `PSNR`/`assess_psnr` -- Peak signal-to-noise ratio
 * `SSIM`/`assess_ssim` -- Structural similarity
+* `MSSSIM`/`assess_msssim` -- Multi-scale SSIM
 
 ### No-reference indexes
 
@@ -35,18 +36,19 @@ For detailed usage of particular index, please check the docstring (e.g., `?PSNR
 using Images, TestImages
 using ImageQualityIndexes
 
-img = testimage("lena_gray_256") .|> float64
+img = testimage("cameraman") .|> float64
 noisy_img = img .+ 0.1 .* randn(size(img))
-assess_ssim(noisy_img, img) # 0.3577
-assess_psnr(noisy_img, img) # 19.9941
+assess_ssim(noisy_img, img) # 0.24112
+assess_psnr(noisy_img, img) # 19.9697
 
 kernel = ones(3, 3)./9 # mean filter
 denoised_img = imfilter(noisy_img, kernel)
-assess_ssim(denoised_img, img) # 0.6529
-assess_psnr(denoised_img, img) # 26.0350
+assess_psnr(denoised_img, img) # 28.4249
+assess_ssim(denoised_img, img) # 0.6390
+assess_msssim(denoised_img, img) # 0.8460
 
-img = testimage("lena_color_256");
-colorfulness(img) # 64.1495
+img = testimage("fabio");
+colorfulness(img) # 68.5530
 
 ```
 
