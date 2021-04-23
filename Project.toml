@@ -1,7 +1,7 @@
 name = "ImageQualityIndexes"
 uuid = "2996bd0c-7a13-11e9-2da2-2f5ce47296a9"
 authors = ["Johnny Chen <johnnychen94@hotmail.com>"]
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 ColorVectorSpace = "c3611d14-8923-5661-9e6a-0046d554d3a4"
@@ -13,7 +13,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 ColorVectorSpace = "0.6, 0.7, 0.8, 0.9"
-ImageCore = "0.8.3"
+ImageCore = "0.8.3, 0.9"
 ImageDistances = "0.2.4"
 ImageFiltering = "0.6.3"
 OffsetArrays = "0.11, 1"
