@@ -20,11 +20,11 @@ end
 _base_colorant_type(::Type{<:Number}) = Gray
 _base_colorant_type(::Type{T}) where T<:Colorant = base_colorant_type(T)
 """
-    test_numeric(dist, a, b, T; filename=nothing)
+    test_numeric(dist, a, b, T; filename=nothing, atol=1e-5)
 
 simply test that `dist` works for 2d image as expected, more tests go to `Distances.jl`
 """
-function test_numeric(dist, a, b, T; filename=nothing)
+function test_numeric(dist, a, b, T; filename=nothing, atol=1e-5)
     size(a) == size(b) || error("a and b should be the same size")
     if filename == nothing
         filename = "references/$(typeof(dist))_$(ndims(a))d"
@@ -35,8 +35,7 @@ function test_numeric(dist, a, b, T; filename=nothing)
             filename = filename * "_$(_base_colorant_type(T))"
         end
     end
-    # @test_reference "$(filename)_$(eltype(a))_$(eltype(b)).txt" assess(dist, a, b)
-    @test_reference "$(filename).txt" string(Float64(assess(dist, a, b)))
+    @test_reference "$(filename).txt" Float64(assess(dist, a, b)) by=(x,y)->isapprox(x,y; atol=atol)
 end
 
 """
