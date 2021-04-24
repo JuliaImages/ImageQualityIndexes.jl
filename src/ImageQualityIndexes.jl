@@ -1,7 +1,7 @@
 module ImageQualityIndexes
 
 using OffsetArrays
-using ImageCore, ColorVectorSpace
+using ImageCore
 # Where possible we avoid a direct dependency to reduce the number of [compat] bounds
 using ImageCore.MappedArrays
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
