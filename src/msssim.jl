@@ -42,7 +42,7 @@ struct MSSSIM{A, N} <: FullReferenceIQI
         all(x-> x>=0, flatten(W)) || throw(ArgumentError("α, β, γ should be non-negative for all scales, instead it's $(W)"))
         sum(flatten(W)) == 0 && throw(ArgumentError("MS-SSIM must have at least one weight > 0"))
 
-        kernel = centered(kernel)
+        kernel = OffsetArrays.centered(kernel)
         if num_scales ≠ length(W)
             W ≠ MSSSIM_W && @warn "truncate MS-SSIM weights to scale $num_scales"
         end

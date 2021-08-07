@@ -54,7 +54,7 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "SSIM kernel is assumed to be symmetric"
         all(W .>= 0) || throw(ArgumentError("(α, β, γ) should be non-negative, instead it's $(W)"))
-        kernel = centered(kernel)
+        kernel = OffsetArrays.centered(kernel)
         new{typeof(kernel)}(kernel, W, crop)
     end
 end
