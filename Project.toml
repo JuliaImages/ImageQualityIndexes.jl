@@ -1,7 +1,7 @@
 name = "ImageQualityIndexes"
 uuid = "2996bd0c-7a13-11e9-2da2-2f5ce47296a9"
 authors = ["Johnny Chen <johnnychen94@hotmail.com>"]
-version = "0.2.3"
+version = "0.2.4"
 
 [deps]
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
