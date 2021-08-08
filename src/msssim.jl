@@ -125,8 +125,10 @@ function _msssim(iqi::MSSSIM,
     end
 end
 
-_msssim(iqi::MSSSIM, x::AbstractArray{<:Color3}, ref::AbstractArray{<:Color3}) =
-    _msssim(iqi, of_eltype(RGB, x), of_eltype(RGB, ref))
+function _msssim(iqi::MSSSIM, x::AbstractArray{<:Color3}, ref::AbstractArray{<:Color3})
+    C = ccolor(RGB, floattype(eltype(x)))
+    _msssim(iqi, of_eltype(C, x), of_eltype(C, ref))
+end
 
 function _average_pooling(x::GenericImage; kernel=ones(2)./2)
     # note that this is slightly slower than two-fold method `ImageTransformations.restrict`
