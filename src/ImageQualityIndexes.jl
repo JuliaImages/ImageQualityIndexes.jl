@@ -5,7 +5,8 @@ using ImageCore
 # Where possible we avoid a direct dependency to reduce the number of [compat] bounds
 using ImageCore.MappedArrays
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
-using ImageDistances, ImageFiltering
+using ImageDistances
+import ImageFiltering: KernelFactors, kernelfactors, imfilter
 using Statistics: mean, std
 using Base.Iterators: repeated, flatten
 
