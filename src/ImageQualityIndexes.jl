@@ -11,6 +11,7 @@ using Statistics: mean, std
 using Base.Iterators: repeated, flatten
 
 include("generic.jl")
+include("gmsd.jl")
 include("psnr.jl")
 include("ssim.jl")
 include("msssim.jl")
@@ -32,6 +33,9 @@ export
     # Multi Scale Structural Similarity
     MSSSIM,
     assess_msssim,
+    
+    # Gradient Magnitude Standard Deviation
+    gmsd,
 
     # Colorfulness
     HASLER_AND_SUSSTRUNK_M3,
