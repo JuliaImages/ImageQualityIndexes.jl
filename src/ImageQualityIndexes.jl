@@ -10,6 +10,7 @@ import ImageFiltering: KernelFactors, kernelfactors, imfilter
 using Statistics: mean, std
 using Base.Iterators: repeated, flatten
 
+include("fsim.jl")
 include("generic.jl")
 include("psnr.jl")
 include("ssim.jl")
@@ -18,6 +19,9 @@ include("colorfulness.jl")
 include("deprecations.jl")
 
 export
+    # fsim
+    fsim,
+    
     # generic
     assess,
 
