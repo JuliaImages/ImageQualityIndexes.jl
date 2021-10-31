@@ -15,7 +15,6 @@ include("psnr.jl")
 include("ssim.jl")
 include("msssim.jl")
 include("colorfulness.jl")
-include("deprecations.jl")
 
 export
     # generic

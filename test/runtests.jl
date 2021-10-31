@@ -13,8 +13,7 @@ include("testutils.jl")
     include("ssim.jl")
     include("msssim.jl")
     include("colorfulness.jl")
-    include("deprecations.jl")
-    
+
 end
 
 nothing
