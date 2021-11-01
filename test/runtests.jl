@@ -4,7 +4,6 @@ using Suppressor
 using Statistics
 using OffsetArrays
 using ImageTransformations
-using Random
 
 include("testutils.jl")
 

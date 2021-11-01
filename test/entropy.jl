@@ -1,5 +1,3 @@
-Random.seed!(1234)
-
 @testset "Entropy" begin
     type_list = generate_test_types([Float32, N0f8], [Gray, RGB])
 
