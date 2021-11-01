@@ -73,6 +73,6 @@ function _log(kind::Symbol)
     elseif kind == :hartley
         return log10
     else
-        throw(ArgumentError("Invalid entropy unit $kind, should be one of `:shannon`, `:nat` or `:hartley`"))
+        throw(ArgumentError("Invalid entropy unit: `$kind`. It should be one of `:shannon`, `:nat` or `:hartley`"))
     end
 end

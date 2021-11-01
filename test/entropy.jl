@@ -28,4 +28,14 @@ Random.seed!(1234)
             @test rst ≈ ref
         end
     end
+
+    # For BitMatrix we have faster implementation, here we check that it
+    # is equivalent to the fallback method.
+    img_bool = img .> 0.5
+    img_float = Float32.(img_bool)
+    for kind in [:shannon, :nat, :hartley]
+        @test entropy(img_bool; kind=kind) == entropy(img_float; kind=kind)
+    end
+
+    @test_throws ArgumentError entropy(img, kind=:something_wrong)
 end
