@@ -4,6 +4,7 @@ using Suppressor
 using Statistics
 using OffsetArrays
 using ImageTransformations
+using Random
 
 include("testutils.jl")
 
@@ -13,6 +14,7 @@ include("testutils.jl")
     include("ssim.jl")
     include("msssim.jl")
     include("colorfulness.jl")
+    include("entropy.jl")
 
 end
 
