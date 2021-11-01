@@ -6,6 +6,7 @@ using ImageCore
 using ImageCore.MappedArrays
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
 using ImageDistances
+using ImageContrastAdjustment
 import ImageFiltering: KernelFactors, kernelfactors, imfilter
 using Statistics: mean, std
 using Base.Iterators: repeated, flatten
@@ -15,6 +16,7 @@ include("psnr.jl")
 include("ssim.jl")
 include("msssim.jl")
 include("colorfulness.jl")
+include("entropy.jl")
 
 export
     # generic
@@ -35,6 +37,9 @@ export
     # Colorfulness
     HASLER_AND_SUSSTRUNK_M3,
     hasler_and_susstrunk_m3,
-    colorfulness
+    colorfulness,
+
+    # used to live in Images.jl
+    entropy
 
 end # module

@@ -13,6 +13,7 @@ include("testutils.jl")
     include("ssim.jl")
     include("msssim.jl")
     include("colorfulness.jl")
+    include("entropy.jl")
 
 end
 
