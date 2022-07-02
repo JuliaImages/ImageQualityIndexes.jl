@@ -52,7 +52,7 @@ julia> entropy(repeat(img, inner=(2, 2), outer=(2, 2)))
 """
 entropy(img::AbstractArray; kind=:shannon, nbins=256) = entropy(_log(kind), img; nbins=nbins)
 function entropy(logᵦ::Log, img; nbins=256) where Log<:Function
-    _, counts = build_histogram(img, nbins)
+    _, counts = ImageContrastAdjustment.build_histogram(img, nbins)
     n = length(img)
     _zero = zero(first(counts)/n)
     -sum(counts) do c

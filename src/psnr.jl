@@ -37,7 +37,7 @@ peak_value(::Type{T}) where T <: NumberLike = one(eltype(T))
 peak_value(::Type{T}) where T <: AbstractRGB = one(eltype(T))
 
 _assess_psnr(x::GenericGrayImage, ref::GenericGrayImage, peakval::Real)::Real =
-    20log10(peakval) - 10log10(mse(x, ref))
+    20log10(peakval) - 10log10(ImageDistances.mse(x, ref))
 
 # convention & backward compatibility for RGB images
 # m*n RGB images are treated as m*n*3 gray images

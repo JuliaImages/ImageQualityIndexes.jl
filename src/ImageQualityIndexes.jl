@@ -1,13 +1,14 @@
 module ImageQualityIndexes
 
+using LazyModules
 using OffsetArrays
 using ImageCore
 # Where possible we avoid a direct dependency to reduce the number of [compat] bounds
 using ImageCore.MappedArrays
 using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
-using ImageDistances
-using ImageContrastAdjustment
-import ImageFiltering: KernelFactors, kernelfactors, imfilter
+@lazy import ImageDistances = "51556ac3-7006-55f5-8cb3-34580c88182d"
+@lazy import ImageContrastAdjustment = "f332f351-ec65-5f6a-b3d1-319c6670881a"
+@lazy import ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
 using Statistics: mean, std
 using Base.Iterators: repeated, flatten
 
@@ -41,5 +42,9 @@ export
 
     # used to live in Images.jl
     entropy
+
+@static if VERSION < v"1.1"
+    isnothing(x) = x === nothing
+end
 
 end # module
