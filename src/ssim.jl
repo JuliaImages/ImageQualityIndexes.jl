@@ -50,7 +50,10 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
     kernel::A
     W::NTuple{3, Float64}
     crop::Bool
-    function SSIM(kernel::AbstractVector=SSIM_KERNEL, W::NTuple=SSIM_W; crop=false)
+    function SSIM(kernel::Union{Nothing,AbstractVector}=nothing, W::Union{Nothing,NTuple}=nothing; crop=false)
+        # default values from [1]
+        kernel = isnothing(kernel) ? ImageFiltering.KernelFactors.gaussian(1.5, 11) : kernel
+        W = isnothing(W) ? (1.0, 1.0, 1.0) : W # (α, β, γ)
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "SSIM kernel is assumed to be symmetric"
         all(W .>= 0) || throw(ArgumentError("(α, β, γ) should be non-negative, instead it's $(W)"))
@@ -58,10 +61,6 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
         new{typeof(kernel)}(kernel, W, crop)
     end
 end
-
-# default values from [1]
-const SSIM_KERNEL = KernelFactors.gaussian(1.5, 11) # kernel
-const SSIM_W = (1.0, 1.0, 1.0) # (α, β, γ)
 
 Base.:(==)(ia::SSIM, ib::SSIM) = ia.kernel == ib.kernel && ia.W == ib.W && ia.crop == ib.crop
 
@@ -158,7 +157,7 @@ end
 function _ssim_statistics(x::GenericImage, ref::GenericImage, window; crop)
     # For RGB and other Color3 images, we don't slide the window at the color channel.
     # In other words, these characters will be calculated channelwisely
-    window = kernelfactors(Tuple(repeated(window, ndims(ref))))
+    window = ImageFiltering.kernelfactors(Tuple(repeated(window, ndims(ref))))
 
     region = map(window, axes(x)) do w, a
         o = length(w) ÷ 2
@@ -168,14 +167,14 @@ function _ssim_statistics(x::GenericImage, ref::GenericImage, window; crop)
     R = crop ? CartesianIndices(region) : CartesianIndices(x)
 
     # don't slide the window in the channel dimension
-    μx = view(imfilter(x,   window, "symmetric"), R) # equation (14) in [1]
-    μy = view(imfilter(ref, window, "symmetric"), R) # equation (14) in [1]
+    μx = view(ImageFiltering.imfilter(x,   window, "symmetric"), R) # equation (14) in [1]
+    μy = view(ImageFiltering.imfilter(ref, window, "symmetric"), R) # equation (14) in [1]
     μx² = _mul.(μx, μx)
     μy² = _mul.(μy, μy)
     μxy = _mul.(μx, μy)
-    σx² = view(imfilter(_mul.(x,   x  ), window, "symmetric"), R) .- μx² # equation (15) in [1]
-    σy² = view(imfilter(_mul.(ref, ref), window, "symmetric"), R) .- μy² # equation (15) in [1]
-    σxy = view(imfilter(_mul.(x,   ref), window, "symmetric"), R) .- μxy # equation (16) in [1]
+    σx² = view(ImageFiltering.imfilter(_mul.(x,   x  ), window, "symmetric"), R) .- μx² # equation (15) in [1]
+    σy² = view(ImageFiltering.imfilter(_mul.(ref, ref), window, "symmetric"), R) .- μy² # equation (15) in [1]
+    σxy = view(ImageFiltering.imfilter(_mul.(x,   ref), window, "symmetric"), R) .- μxy # equation (16) in [1]
 
     # after that, channel dimension can be treated generically so we expand them here
     return channelview.((μx², μxy, μy², σx², σxy, σy²))

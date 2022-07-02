@@ -13,7 +13,7 @@ Computes the multi-scale structural similarity (MS-SSIM) between two images.
 # Examples
 
 For benchmark usage, it is recommended to use `assess_msssim(img, ref)`. One could also create
-a custom `MSSSIM` instance and then pass it to `assess` or use it as a function. 
+a custom `MSSSIM` instance and then pass it to `assess` or use it as a function.
 
 ```julia
 iqi = MSSSIM(KernelFactors.gaussian(2.5, 17), (1.0, 1.0, 2.0)./4)
@@ -34,7 +34,9 @@ struct MSSSIM{A, N} <: FullReferenceIQI
     kernel::A
     W::NTuple{N, NTuple{3, Float64}}
 
-    function MSSSIM(kernel=SSIM_KERNEL, W=MSSSIM_W; num_scales::Integer=length(W))
+    function MSSSIM(kernel=nothing, W=MSSSIM_W; num_scales::Integer=length(W))
+        kernel = isnothing(kernel) ? ImageFiltering.KernelFactors.gaussian(1.5, 11) : kernel
+
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "MSSSIM kernel is assumed to be symmetric"
         all(length.(W) .== 3) || throw(ArgumentError("(α, β, γ) required for all scales, instead it's $(W)"))
@@ -52,7 +54,7 @@ struct MSSSIM{A, N} <: FullReferenceIQI
             W ≠ MSSSIM_W[1:num_scales] && @warn "normalize MS-SSIM weights so that (∑α, ∑β, ∑γ) == (1.0, 1.0, 1.0)"
             W = map(w->w./sw, W)
         end
-        
+
         new{typeof(kernel), Int(num_scales)}(kernel, W)
     end
 end
@@ -100,7 +102,7 @@ function _msssim(iqi::MSSSIM,
 
     mean_lcs = NTuple{3, Float64}[]
     for i in 1:num_scales
-        # instead of the original implementation that calculates mean(c .* s) 
+        # instead of the original implementation that calculates mean(c .* s)
         # here we use a more general version mean(c) * mean(s)
         lcs = mean.(__ssim_map_general(x, ref, iqi.kernel, C₁, C₂, C₃; crop=true))
         push!(mean_lcs, lcs)
@@ -132,7 +134,7 @@ end
 
 function _average_pooling(x::GenericImage; kernel=ones(2)./2)
     # note that this is slightly slower than two-fold method `ImageTransformations.restrict`
-    window = kernelfactors(Tuple(repeated(kernel, ndims(x))))
+    window = ImageFiltering.kernelfactors(Tuple(repeated(kernel, ndims(x))))
     R = ntuple(i->first(axes(x, i)) : 2 : last(axes(x, i)), ndims(x))
-    return imfilter(x, window, "symmetric")[R...]
+    return ImageFiltering.imfilter(x, window, "symmetric")[R...]
 end
