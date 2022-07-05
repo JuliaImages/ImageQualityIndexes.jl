@@ -34,7 +34,7 @@ struct MSSSIM{A, N} <: FullReferenceIQI
     kernel::A
     W::NTuple{N, NTuple{3, Float64}}
 
-    function MSSSIM(kernel=nothing, W=MSSSIM_W; num_scales::Integer=length(W))
+    function MSSSIM(kernel=SSIM_KERNEL, W=MSSSIM_W; num_scales::Integer=length(W))
         kernel = isnothing(kernel) ? ImageFiltering.KernelFactors.gaussian(1.5, 11) : kernel
 
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
