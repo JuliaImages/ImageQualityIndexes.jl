@@ -35,8 +35,6 @@ struct MSSSIM{A, N} <: FullReferenceIQI
     W::NTuple{N, NTuple{3, Float64}}
 
     function MSSSIM(kernel=SSIM_KERNEL, W=MSSSIM_W; num_scales::Integer=length(W))
-        kernel = isnothing(kernel) ? ImageFiltering.KernelFactors.gaussian(1.5, 11) : kernel
-
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "MSSSIM kernel is assumed to be symmetric"
         all(length.(W) .== 3) || throw(ArgumentError("(α, β, γ) required for all scales, instead it's $(W)"))

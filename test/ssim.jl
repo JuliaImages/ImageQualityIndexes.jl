@@ -3,6 +3,9 @@ using ImageFiltering
 @testset "SSIM" begin
     @info "test: SSIM"
 
+    # ensure the precomputed value for SSIM_KERNEL is correct
+    @test ImageQualityIndexes.SSIM_KERNEL == ImageQualityIndexes.ImageFiltering.KernelFactors.gaussian(1.5, 11)
+
     iqi_a = SSIM()
     iqi_b = SSIM(KernelFactors.gaussian(1.5, 11))
     iqi_c = SSIM(KernelFactors.gaussian(1.5, 11), (1.0, 1.0, 1.0))
