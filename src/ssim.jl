@@ -50,10 +50,7 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
     kernel::A
     W::NTuple{3, Float64}
     crop::Bool
-    function SSIM(kernel::Union{Nothing,AbstractVector}=nothing, W::Union{Nothing,NTuple}=nothing; crop=false)
-        # default values from [1]
-        kernel = isnothing(kernel) ? ImageFiltering.KernelFactors.gaussian(1.5, 11) : kernel
-        W = isnothing(W) ? (1.0, 1.0, 1.0) : W # (α, β, γ)
+    function SSIM(kernel::AbstractVector=SSIM_KERNEL, W::NTuple=SSIM_W; crop=false)
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "SSIM kernel is assumed to be symmetric"
         all(W .>= 0) || throw(ArgumentError("(α, β, γ) should be non-negative, instead it's $(W)"))
@@ -61,6 +58,22 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
         new{typeof(kernel)}(kernel, W, crop)
     end
 end
+
+# default values from [1]
+# kernel generated from ImageFiltering.KernelFactors.gaussian(1.5, 11)
+# don't use ImageFiltering directly here because we lazy-import that dependency
+const SSIM_KERNEL = OffsetArray([0.00102838008447911,
+        0.007598758135239185,
+        0.03600077212843083,
+        0.10936068950970002,
+        0.2130055377112537,
+        0.26601172486179436,
+        0.2130055377112537,
+        0.10936068950970002,
+        0.03600077212843083,
+        0.007598758135239185,
+        0.00102838008447911,], -5:5)
+const SSIM_W = (1.0, 1.0, 1.0) # (α, β, γ)
 
 Base.:(==)(ia::SSIM, ib::SSIM) = ia.kernel == ib.kernel && ia.W == ib.W && ia.crop == ib.crop
 
