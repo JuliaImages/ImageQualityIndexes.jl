@@ -52,8 +52,8 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
     crop::Bool
     function SSIM(kernel::Union{Nothing,AbstractVector}=nothing, W::Union{Nothing,NTuple}=nothing; crop=false)
         # default values from [1]
-        kernel = isnothing(kernel) ? ImageFiltering.KernelFactors.gaussian(1.5, 11) : kernel
-        W = isnothing(W) ? (1.0, 1.0, 1.0) : W # (α, β, γ)
+        kernel = isnothing(kernel) ? SSIM_KERNEL : kernel
+        W = isnothing(W) ? SSIM_W : W # (α, β, γ)
         ndims(kernel) == 1 || throw(ArgumentError("only 1-d kernel is valid"))
         issymetric(kernel) || @warn "SSIM kernel is assumed to be symmetric"
         all(W .>= 0) || throw(ArgumentError("(α, β, γ) should be non-negative, instead it's $(W)"))
@@ -61,6 +61,10 @@ struct SSIM{A<:AbstractVector} <: FullReferenceIQI
         new{typeof(kernel)}(kernel, W, crop)
     end
 end
+
+# default values from [1]
+const SSIM_KERNEL = ImageFiltering.KernelFactors.gaussian(1.5, 11) # kernel
+const SSIM_W = (1.0, 1.0, 1.0) # (α, β, γ)
 
 Base.:(==)(ia::SSIM, ib::SSIM) = ia.kernel == ib.kernel && ia.W == ib.W && ia.crop == ib.crop
 
