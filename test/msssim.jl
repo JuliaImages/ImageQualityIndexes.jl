@@ -1,5 +1,3 @@
-using ImageFiltering
-
 @testset "MS-SSIM" begin
     @info "test: MS-SSIM"
 

@@ -170,14 +170,15 @@ end
 function _ssim_statistics(x::GenericImage, ref::GenericImage, window; crop)
     # For RGB and other Color3 images, we don't slide the window at the color channel.
     # In other words, these characters will be calculated channelwisely
-    window = ImageFiltering.kernelfactors(Tuple(repeated(window, ndims(ref))))
 
-    region = map(window, axes(x)) do w, a
-        o = length(w) ÷ 2
+    region = map(axes(x)) do a
+        o = length(window) ÷ 2
         # Even if crop=true, it crops only when image is larger than window
-        length(a) > length(w) ? (first(a)+o:last(a)-o) : a
+        length(a) > length(window) ? (first(a)+o:last(a)-o) : a
     end
     R = crop ? CartesianIndices(region) : CartesianIndices(x)
+
+    window = ImageFiltering.kernelfactors(Tuple(repeated(window, ndims(ref))))
 
     # don't slide the window in the channel dimension
     μx = view(ImageFiltering.imfilter(x,   window, "symmetric"), R) # equation (14) in [1]
