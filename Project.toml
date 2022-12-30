@@ -1,7 +1,7 @@
 name = "ImageQualityIndexes"
 uuid = "2996bd0c-7a13-11e9-2da2-2f5ce47296a9"
 authors = ["Johnny Chen <johnnychen94@hotmail.com>"]
-version = "0.3.3"
+version = "0.3.4"
 
 [deps]
 ImageContrastAdjustment = "f332f351-ec65-5f6a-b3d1-319c6670881a"
