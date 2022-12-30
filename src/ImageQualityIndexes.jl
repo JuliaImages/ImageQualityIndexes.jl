@@ -19,6 +19,8 @@ include("msssim.jl")
 include("colorfulness.jl")
 include("entropy.jl")
 
+include("precompile.jl")
+
 export
     # generic
     assess,
