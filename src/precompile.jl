@@ -1,6 +1,6 @@
-using SnoopPrecompile
+using PrecompileTools
 
-@precompile_setup begin
+@setup_workload begin
     imgs_list = Any[
         [rand(Gray{N0f8}, 32, 32) for _ in 1:2],
         [rand(RGB{N0f8}, 32, 32) for _ in 1:2],
@@ -9,7 +9,7 @@ using SnoopPrecompile
         [rand(N0f8, 32, 32) for _ in 1:2],
         [rand(Float64, 32, 32) for _ in 1:2],
     ]
-    @precompile_all_calls begin
+    @compile_workload begin
         for imgs in imgs_list
             assess_psnr(imgs...)
             assess_ssim(imgs...)
