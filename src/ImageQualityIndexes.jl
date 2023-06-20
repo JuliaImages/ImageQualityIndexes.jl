@@ -19,7 +19,11 @@ include("msssim.jl")
 include("colorfulness.jl")
 include("entropy.jl")
 
-include("precompile.jl")
+if VERSION >= v"1.9.0"
+    # It seems to be brittle to use `precompile` for old Julia versions (e.g., 1.7.3)
+    # Since this only makes a huge difference after Julia 1.9, we only enable it for recent versions.
+    include("precompile.jl")
+end
 
 export
     # generic
