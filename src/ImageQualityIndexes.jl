@@ -12,6 +12,7 @@ using ImageCore: NumberLike, Pixel, GenericImage, GenericGrayImage
 using Statistics: mean, std
 using Base.Iterators: repeated, flatten
 
+include("fsim.jl")
 include("generic.jl")
 include("psnr.jl")
 include("ssim.jl")
@@ -26,6 +27,9 @@ if VERSION >= v"1.9.0"
 end
 
 export
+    # fsim
+    fsim,
+    
     # generic
     assess,
 
